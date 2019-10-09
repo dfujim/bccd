@@ -463,11 +463,12 @@ def draw_2Dfit(shape,fn,*pars,levels=10,cmap='jet'):
     # draw image
     X,Y = np.meshgrid(x,y)
     ax = plt.gca()
-    CS = ax.contour(X,Y,gauss,levels=levels,cmap=cmap)
-    return CS
+    contours = ax.contour(X,Y,gauss,levels=levels,cmap=cmap)
+    ax.clabel(contours,inline=True,fontsize='x-small',fmt='%g')
+    return contours
     
 def fit_gaussian2D(filename,blacklevel=0,rescale_pixels=True,
-                   draw_output=True,**kwargs):
+                   draw_output=True,nicedraw=True,**kwargs):
     """
         Fit 2D gaussian to image
     """
@@ -492,10 +493,15 @@ def fit_gaussian2D(filename,blacklevel=0,rescale_pixels=True,
     std = np.diag(cov)**0.5
     
     # draw output
-    if draw_output:
+    if draw_output or nicedraw:
         plt.figure()    
         draw(filename,blacklevel=blacklevel,rescale_pixels=rescale_pixels)
-        draw_2Dfit(data.shape,gaussian2D,*par,**kwargs)
+        contours = draw_2Dfit(data.shape,gaussian2D,*par[:4],1,0,**kwargs)
+        
+        if nicedraw:
+            plt.xlim((par[0]-4*par[2],par[0]+4*par[2]))
+            plt.ylim((par[1]-4*par[3],par[1]+4*par[3]))
+            plt.gca().clabel(contours,inline=True,fontsize='x-small',fmt='%g')
     
     return(par,std)
     

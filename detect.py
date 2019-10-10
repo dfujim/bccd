@@ -11,9 +11,9 @@ from skimage.feature import canny
 from skimage.transform import hough_circle,hough_circle_peaks
 from skimage.transform import probabilistic_hough_line
 
-from ccddraw.read import get_data
-from ccddraw.misc import mask_data
-from ccddraw import show_options
+from bccd.read import get_data
+from bccd.misc import mask_data
+from bccd import show_options
 
 def get_lines(filename,sigma=1,min_length=50,min_gap=3,theta=None,n=np.inf,
                  blacklevel=0,draw=True,rescale_pixels=True,**kwargs):

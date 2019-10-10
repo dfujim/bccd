@@ -5,13 +5,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ccddraw.read import get_data
-from ccddraw.misc import mask_data
+from bccd.read import get_data
+from bccd.misc import mask_data
 
 import skimage as ski
 from skimage import filters
 from skimage.feature import canny
-from ccddraw import show_options
+from bccd import show_options
 
 def draw(filename,blacklevel=0,alpha=1,cmap='Greys',rescale_pixels=True,mask=None,
          **kwargs):

@@ -10,11 +10,11 @@ from astropy.io import fits
 from scipy.optimize import curve_fit
 from scipy.integrate import dblquad
 
-from ccddraw.read import get_data
-from ccddraw.misc import mask_data
-from ccddraw.functions import gaussian2D
-from ccddraw.draw import draw_2Dfit
-from ccddraw import show_options
+from bccd.read import get_data
+from bccd.misc import mask_data
+from bccd.functions import gaussian2D
+from bccd.draw import draw_2Dfit
+from bccd import show_options
 
 def fit2D(filename,function,blacklevel=0,rescale_pixels=True,**fitargs):
     """

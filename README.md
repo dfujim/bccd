@@ -9,10 +9,10 @@ get_header(filename)
 ## ccddraw.draw
 ```python
 draw(filename,blacklevel=0,alpha=1,cmap='Greys',rescale_pixels=True,mask=None,**kwargs)
+draw_2Dfit(shape,fn,*pars,levels=10,cmap='jet')
+draw_contour(filename,n=5,blacklevel=0,alpha=1,cmap='Greys',rescale_pixels=True,**kwargs)
 draw_edges(filename,blacklevel=0,sigma=1,alpha=1,cmap='Greys',rescale_pixels=True,draw_image=True,mask=None,**kwargs)
 draw_sobel(filename,blacklevel=0,alpha=1,cmap='Greys',rescale_pixels=True,**kwargs)
-draw_contour(filename,n=5,blacklevel=0,alpha=1,cmap='Greys',rescale_pixels=True,**kwargs)
-draw_2Dfit(shape,fn,*pars,levels=10,cmap='jet')
 ```
 
 ## ccddraw.detect

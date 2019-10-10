@@ -17,9 +17,9 @@ draw_sobel(filename,blacklevel=0,alpha=1,cmap='Greys',rescale_pixels=True,**kwar
 
 ## ccddraw.detect
 ```python
-get_lines(filename,sigma=1,min_length=50,min_gap=3,theta=None,n=np.inf,blacklevel=0,draw=True,rescale_pixels=True,**kwargs)
-get_hlines(filename,sigma=1,min_length=50,min_gap=3,n=np.inf,blacklevel=0,draw=True,rescale_pixels=True,**kwargs)
 get_circles(filename,rad_range,n=1,sigma=1,blacklevel=0,draw=True,rescale_pixels=True,**kwargs)
+get_hlines(filename,sigma=1,min_length=50,min_gap=3,n=np.inf,blacklevel=0,draw=True,rescale_pixels=True,**kwargs)
+get_lines(filename,sigma=1,min_length=50,min_gap=3,theta=None,n=np.inf,blacklevel=0,draw=True,rescale_pixels=True,**kwargs)
 ```
 
 ## ccddraw.process

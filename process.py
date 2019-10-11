@@ -13,7 +13,7 @@ from scipy.integrate import dblquad
 from bccd.read import get_data
 from bccd.misc import mask_data
 from bccd.functions import gaussian2D
-from bccd.draw import draw_2Dfit
+from bccd.draw import draw_2Dfit,draw
 from bccd import show_options
 
 def fit2D(filename,function,blacklevel=0,rescale_pixels=True,**fitargs):

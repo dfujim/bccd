@@ -12,7 +12,7 @@ get_header(filename)
 Parameters: 
 
 ```
-blacklevel:       float, value to set to black, all pixels of lower value raised to this level. Use to 
+blacklevel:       float, value to set to black, all pixels of lower value raised to this level. Use to
                   clean up noise. 
 filename:         str, path to .fits file
 rescale_pixels:   bool, pixels are intrinsically asymmetric. Rescale image such that the pixels are 
@@ -66,19 +66,19 @@ get_lines(filename,sigma=1,min_length=50,min_gap=3,theta=None,n=np.inf,blackleve
 Parameters:
 
 ```
-blacklevel:       float, value to set to black, all pixels of lower value raised to this level. Use to 
+blacklevel:       float, value to set to black, all pixels of lower value raised to this level. Use to
                   clean up noise. 
 filename:         str, path to .fits file
 draw:             bool, if true, draw output
 kwargs:           **dict, unused
 min_length:       float, minimum length of lines to find, in pixels
-min_gap:          float, maximum acceptable distance between line pixels which do not signify breaking 
+min_gap:          float, maximum acceptable distance between line pixels which do not signify breaking
                   the line
 n:                int, number of shapes to find
 rad_range:        tuple, radius range to seach in (r_lo, r_hi)
-rescale_pixels:   bool, pixels are intrinsically asymmetric. Rescale image such that the pixels are 
+rescale_pixels:   bool, pixels are intrinsically asymmetric. Rescale image such that the pixels are
                   square, interpolating pixel values with 3rd order spline. 
-sigma:            float, standard deviation of rolling Gaussian filter, smoothing image features. 
+sigma:            float, standard deviation of rolling Gaussian filter, smoothing image features.
 theta:            float, list of acceptable angles for the lines to point
 ```
 
@@ -97,7 +97,7 @@ get_gaussian2D_overlap(ylo,yhi,xlo,xhi,x0,y0,sx,sy,amp,theta=0)
 Parameters:
 
 ```
-blacklevel:       float, value to set to black, all pixels of lower value raised to this level. Use to 
+blacklevel:       float, value to set to black, all pixels of lower value raised to this level. Use to
                   clean up noise. 
 filename:         str, path to .fits file
 fitargs:          **dict, arguments passed to curve_fit

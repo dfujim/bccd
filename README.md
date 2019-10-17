@@ -36,7 +36,7 @@ Parameters:
 
 ```
 alpha:            float, image transparency. Range: [0,1].
-blacklevel:       float, value to set to black, all pixels of lower value raised to this level. Use to 
+blacklevel:       float, value to set to black, all pixels of lower value raised to this level. Use to
                   clean up noise. 
 cmap:             str, color map to color the image. Ex: "Reds", "Greens", etc.
 filename:         str, path to .fits file
@@ -45,10 +45,10 @@ levels:           int, number of contour levels to draw
 kwargs:           **dict, unused
 mask:             tuple, exclude all pixels outside of circle from draw or calculation. (x0,y0,r)
 pars:             *tuple, parameters passed to fn. 
-rescale_pixels:   bool, pixels are intrinsically asymmetric. Rescale image such that the pixels are 
+rescale_pixels:   bool, pixels are intrinsically asymmetric. Rescale image such that the pixels are
                   square, interpolating pixel values with 3rd order spline. 
 shape:            tuple, shape of the image (number of pixels x,y)
-sigma:            float, standard deviation of rolling Gaussian filter, smoothing image features. 
+sigma:            float, standard deviation of rolling Gaussian filter, smoothing image features.
 ```
 
 ## bccd.detect

@@ -33,7 +33,7 @@ set_mask(mask)
 
 Data fields:
 
-```python
+```
 black:          float, pixel value corresponding to black (zero)
 data:           2D numpy array, pixel values
 data_original:  numpy array, pixel values
@@ -72,6 +72,7 @@ draw:           bool, if true, draw output
 filename:       str, path to .fits file
 fitargs:        **dict, arguments passed to curve_fit
 fn:             function handle, function to draw
+imap:           bool, if True, invert color map colours
 levels:         int, number of contour levels to draw
 kwargs:         **dict, unused
 mask:           tuple, exclude all pixels outside of circle from draw or calculation. (x0,y0,r)

@@ -2,12 +2,9 @@
 # Derek Fujimoto
 # Nov 2019
 
-# Read file 
-# Derek Fujimoto
-# Oct 2019
-
 import os
 import numpy as np
+import pandas as pd
 
 from bccd.functions import gaussian2D
 from astropy.io import fits as astrofits
@@ -36,7 +33,13 @@ class fits(object):
             data_original:  numpy array, pixel values
             header:         dict, header information
             
-            result_gaussian2D:  (par,cov) fitting results
+            mask:           (x,y,r) specifying circle to mask on
+            
+            result_center:      (par,names) fitting results
+            result_cm:          (par,names) center of mass results
+            result_fit2D:       (par,cov) fitting results
+            result_gaussian2D:  (par,cov,names) fitting results
+            result_gaussian2D_overlap: float, overlap
             
         Colormaps: 
             Greys
@@ -313,7 +316,10 @@ class fits(object):
         
         # fit
         x = np.indices(data.shape)[::-1]
-        return curve_fit(fitfn,x,flat,**fitargs)
+        par,cov = curve_fit(fitfn,x,flat,**fitargs)
+        
+        self.result_fit2D = (par,cov)
+        return (par,cov)
     
     # ======================================================================= #    
     def fit_gaussian2D(self,draw=True,**kwargs):
@@ -351,7 +357,7 @@ class fits(object):
             plt.ylim((par[1]-4*par[3],par[1]+4*par[3]))
             plt.gca().clabel(contours,inline=True,fontsize='x-small',fmt='%g')
     
-        self.result_gaussian2D = (par,cov)
+        self.result_gaussian2D = (par,cov,('x0','y0','sigmax','sigmay','amp','theta'))
         
         return(par,std)
     
@@ -415,7 +421,8 @@ class fits(object):
                 plt.xlim(parx[0]-parx[1]*6,parx[0]+parx[1]*6)
                 
                 
-        # ~ self.result_center = 
+        self.result_center = ((parx[0],pary[0],parx[1],pary[1]),
+                              ('x0','y0','sigx','sigy'))
                 
         # return 
         return (parx[0],pary[0],parx[1],pary[1])
@@ -451,13 +458,13 @@ class fits(object):
             plt.imshow(data,cmap='Greys_r',**self.show_options)
             plt.plot(cx,cy,'x')
                 
-        # ~ self.result_cm =         
+        self.result_cm = ((cx,cy),('x0','y0'))
         
         # return 
         return (cx,cy)
 
     # ======================================================================= #
-    def get_gaussian2D_overlap(self,ylo,yhi,xlo,xhi,x0,y0,sx,sy,amp,theta=0):
+    def get_gaussian2D_overlap(self,ylo,yhi,xlo,xhi):
         """
             Get integral of gaussian2D PDF within some interval, normalized to the 
             area such that the returned overlap is the event probability within the 
@@ -467,10 +474,6 @@ class fits(object):
             yhi:    upper integration bound [outer] (float)
             xlo:    lower integration bound [inner] (lambda function)
             xlhi:   upper integration bound [inner] (lambda function)
-            x0,y0:  gaussian mean location
-            sx,sy:  standard deviation
-            amp:    unused in favour of normalized amplitude (present for ease of use)
-            theta:  angle of rotation
             
                 integration is: 
                     
@@ -480,6 +483,9 @@ class fits(object):
             returns overlap as given by dblquad
         """
         
+        # get fitting results 
+        x0,y0,sx,sy,amp,theta = self.results_gaussian2D[0]
+        
         # get normalized amplitude
         # https://en.wikipedia.org/wiki/Gaussian_function
         a = 0.5*(np.cos(theta)/sx)**2 + 0.5*(np.sin(theta)/sy)**2
@@ -488,10 +494,13 @@ class fits(object):
         amp = np.sqrt(a*c-b**2)/np.pi
         
         # make PDF
-        gaus = lambda x,y: gaussian2D(x,y,x0,y0,sx,sy,amp,theta)
+        gaus = lambda x,y: self.gaussian2D(x,y,x0,y0,sx,sy,amp,theta)
         
         # integrate: fraction of beam overlap
-        return dblquad(gaus,ylo,yhi,xlo,xhi)[0]
+        overlap =  dblquad(gaus,ylo,yhi,xlo,xhi)[0]
+        
+        self.result_gaussian2D_overlap = overlap
+        return overlap
         
     # ======================================================================= #
     def read(self,filename,rescale_pixels=True):
@@ -537,10 +546,11 @@ class fits(object):
                     this level
         """
         
-        self.data = np.copy(self.data_original)
-        self.data[self.data<black] = black
+        # set the black input
         self.black = black
         
+        # apply black input and mask settings
+        self.set_mask(self.mask)
         
     # ======================================================================= #
     def set_mask(self,mask):
@@ -549,7 +559,12 @@ class fits(object):
             mask:       (x,y,r) specifying center and radius of circle to mask on
         """
         
-        data = self.data
+        # set the mask input
+        self.mask = mask
+        
+        # reset blacklevel
+        data = np.copy(self.data_original)
+        data[data<self.black] = self.black
         
         # masking
         if mask is not None:     

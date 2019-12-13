@@ -68,7 +68,7 @@ class fits(object):
             
     # ======================================================================= #
     def detect_lines(self,sigma=1,min_length=50,min_gap=3,theta=None,nlines=np.inf,
-                     draw=True,**kwargs):
+                     draw=True):
         """
             Detect lines in image
             
@@ -132,7 +132,7 @@ class fits(object):
         return [l[0][1] for l in lines]
     
     # ======================================================================= #
-    def detect_circles(self,rad_range,nlines=1,sigma=1,draw=True,**kwargs):
+    def detect_circles(self,rad_range,nlines=1,sigma=1,draw=True):
         """
             Detect circles in image
             
@@ -172,7 +172,7 @@ class fits(object):
         return (cx,cy,radii)
     
     # ======================================================================= #
-    def draw(self,black=0,alpha=1,cmap='Greys',imap=True,**kwargs):
+    def draw(self,black=None,alpha=1,cmap='Greys',imap=True):
         """
             Draw fits file to matplotlib figure
             
@@ -183,7 +183,8 @@ class fits(object):
         """
         
         # get raw data
-        self.set_black(black)
+        if black is not None:
+            self.set_black(black)
         data = self.data
         
         # color map 
@@ -219,7 +220,7 @@ class fits(object):
         return contours
 
     # ======================================================================= #
-    def draw_contour(self,nlevels=5,alpha=1,cmap='Greys',imap=True,**kwargs):
+    def draw_contour(self,nlevels=5,alpha=1,cmap='Greys',imap=True):
         """
             Draw contours of fits file to matplotlib figure
             
@@ -240,7 +241,7 @@ class fits(object):
         ax.contour(X,Y,data,levels=nlevels,cmap=cmap,**self.show_options)
     
     # ======================================================================= #
-    def draw_edges(self,sigma=1,alpha=1,cmap='Greys',imap=True,**kwargs):
+    def draw_edges(self,sigma=1,alpha=1,cmap='Greys',imap=True):
         """
             Draw fits file to matplotlib figure
             
@@ -266,7 +267,7 @@ class fits(object):
         plt.imshow(edges,alpha=alpha,cmap=cmap,**self.show_options)
         
     # ======================================================================= #
-    def draw_sobel(self,alpha=1,cmap='Greys',imap=False,**kwargs):
+    def draw_sobel(self,alpha=1,cmap='Greys',imap=False):
         """
             Draw fits file to matplotlib figure
             
@@ -322,7 +323,7 @@ class fits(object):
         return (par,cov)
     
     # ======================================================================= #    
-    def fit_gaussian2D(self,draw=True,**kwargs):
+    def fit_gaussian2D(self,draw=True,**fitargs):
         """
             Fit 2D gaussian to image
             
@@ -347,22 +348,26 @@ class fits(object):
         par,cov = self.fit2D(gaussian2D,p0=p0)
         std = np.diag(cov)**0.5
         
+        # make output
+        df = pd.DataFrame({"result":par,"error":std},
+                            index=('x0','y0','sigmax','sigmay','amp','theta'))
+        
         # draw output
         if draw:
             plt.figure()    
             self.draw()
-            contours = self.draw_2Dfit(gaussian2D,*par[:4],1,0,**kwargs)
+            contours = self.draw_2Dfit(gaussian2D,*par[:4],1,0,**fitargs)
             
             plt.xlim((par[0]-4*par[2],par[0]+4*par[2]))
             plt.ylim((par[1]-4*par[3],par[1]+4*par[3]))
             plt.gca().clabel(contours,inline=True,fontsize='x-small',fmt='%g')
     
-        self.result_gaussian2D = (par,cov,('x0','y0','sigmax','sigmay','amp','theta'))
+        self.result_gaussian2D = df
         
-        return(par,std)
+        return df
     
     # ======================================================================= #    
-    def get_center(self,draw=True,**kwargs):
+    def get_center(self,draw=True):
         """
             Get image center of mass
             
@@ -428,7 +433,7 @@ class fits(object):
         return (parx[0],pary[0],parx[1],pary[1])
 
     # ======================================================================= #
-    def get_cm(self,draw=True,**kwargs):
+    def get_cm(self,draw=True):
         """
             Get image center of mass
             
@@ -484,7 +489,7 @@ class fits(object):
         """
         
         # get fitting results 
-        x0,y0,sx,sy,amp,theta = self.results_gaussian2D[0]
+        x0,y0,sx,sy,amp,theta = self.result_gaussian2D['result']
         
         # get normalized amplitude
         # https://en.wikipedia.org/wiki/Gaussian_function

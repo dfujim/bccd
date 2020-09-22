@@ -1,4 +1,4 @@
-from bccd.gui.main import bccd
+from bccd.gui.bccd import bccd
 import os
 # ~ from logging.handlers import RotatingFileHandler
 import argparse

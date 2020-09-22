@@ -6,7 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from bccd.functions import gaussian2D
+from bccd.backend.functions import gaussian2D
 from astropy.io import fits as astrofits
 
 from scipy.optimize import curve_fit

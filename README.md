@@ -13,19 +13,29 @@ fits(filename,rescale_pixels=True)
 Functions: 
     
 ```python
+
+# look for shapes in image
 detect_lines(sigma=1,min_length=50,min_gap=3,theta=None,nlines=np.inf,draw=True)
 detect_hlines(sigma=1,min_length=50,min_gap=3,nlines=np.inf,draw=True,**kwargs)
 detect_circles(rad_range,nlines=1,sigma=1,draw=True)
+
+# drawing and visualization
 draw(black=0,alpha=1,cmap='Greys',imap=True)
 draw_2Dfit(fn,*pars,levels=10,cmap='jet')
 draw_contour(nlevels=5,alpha=1,cmap='Greys',imap=True)
 draw_edges(sigma=1,alpha=1,cmap='Greys',imap=True) 
 draw_sobel(alpha=1,cmap='Greys',imap=False)
+
+# fitting
 fit2D(function,**fitargs)
 fit_gaussian2D(draw=True,**fitargs)
+
+# processing
 get_center(draw=True)
 get_cm(draw=True)
 get_gaussian2D_overlap(ylo,yhi,xlo,xhi)
+
+# worker functions
 read(filename,rescale_pixels=True)
 set_black(black)
 set_mask(mask)

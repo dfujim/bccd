@@ -12,7 +12,7 @@ from astropy.io import fits as astrofits
 from scipy.optimize import curve_fit
 from scipy.integrate import dblquad
 
-import matplotlib.pyplot as plt
+from bccd.backend.PltTracker import PltTracker
 from matplotlib.patches import Circle
 
 import skimage as ski
@@ -31,10 +31,12 @@ class fits(object):
             black:          float, pixel value corresponding to black (zero)
             data:           2D numpy array, pixel values
             data_original:  numpy array, pixel values
+            filename:       name of the file
             header:         dict, header information
             
             mask:           (x,y,r) specifying circle to mask on
             
+            plt:            PltTracker object or None
             result_center:      (par,names) fitting results
             result_cm:          (par,names) center of mass results
             result_fit2D:       (par,cov) fitting results
@@ -57,14 +59,21 @@ class fits(object):
                     'interpolation':'nearest'}
     
     # ======================================================================= #
-    def __init__(self,filename,rescale_pixels=True):
+    def __init__(self,filename, plt=None, rescale_pixels=True):
         """
             Read the file
+            self.plt: plot tracker
             rescale_pixels: if True, rescale image such that pixels are square
         """
+        self.filename = filename
         self.read(filename,rescale_pixels=rescale_pixels)
         self.data_original = np.copy(self.data)
         self.set_mask(None)
+        
+        if plt is None:
+            self.plt = PltTracker()
+        else:
+            self.plt = plt
             
     # ======================================================================= #
     def detect_lines(self,sigma=1,min_length=50,min_gap=3,theta=None,nlines=np.inf,
@@ -92,13 +101,13 @@ class fits(object):
                                          line_gap=min_gap,theta=theta)
         # draw
         if draw:
-            plt.figure()
-            plt.imshow(data,alpha=1,cmap='Greys_r',**self.show_options)
+            self.plt.figure()
+            self.plt.imshow(data,alpha=1,cmap='Greys_r',**self.show_options)
             edges = np.ma.masked_where(~edges,edges.astype(int))
-            plt.imshow(edges,alpha=1,cmap='Reds_r',**self.show_options)
+            self.plt.imshow(edges,alpha=1,cmap='Reds_r',**self.show_options)
             
             for line in lines:
-                plt.plot(*tuple(np.array(line).T))
+                self.plt.plot(*tuple(np.array(line).T))
                 
         # return 
         return lines
@@ -159,14 +168,14 @@ class fits(object):
         
         # draw
         if draw:
-            plt.imshow(data,alpha=1,cmap='Greys_r',**self.show_options)
+            self.plt.imshow(data,alpha=1,cmap='Greys_r',**self.show_options)
             edges = np.ma.masked_where(~edges,edges.astype(int))
-            plt.imshow(edges,alpha=1,cmap='Reds_r',**self.show_options)
+            self.plt.imshow(edges,alpha=1,cmap='Reds_r',**self.show_options)
             
             for center_y, center_x, radius in zip(cy, cx, radii):
                 circle = Circle((center_x,center_y),radius,
                             facecolor='none',linewidth=1,edgecolor='g')
-                plt.gca().add_patch(circle)
+                self.plt.gca().add_patch(circle)
                 
         # return 
         return (cx,cy,radii)
@@ -191,7 +200,7 @@ class fits(object):
         if imap: cmap+='_r'
         
         # draw
-        plt.imshow(data,alpha=alpha,cmap=cmap,**self.show_options)
+        self.plt.imshow(id=self.filename,X=data,alpha=alpha,cmap=cmap,**self.show_options)
     
     # ======================================================================= #    
     def draw_2Dfit(self,fn,*pars,levels=10,cmap='jet'):
@@ -212,7 +221,7 @@ class fits(object):
 
         # draw image
         X,Y = np.meshgrid(x,y)
-        ax = plt.gca()
+        ax = self.plt.gca()
         contours = ax.contour(X,Y,gauss,levels=levels,cmap=cmap)
         ax.clabel(contours,inline=True,fontsize='x-small',fmt='%g')
         
@@ -237,7 +246,7 @@ class fits(object):
         
         # draw
         X,Y = np.meshgrid(*tuple(map(np.arange,data.shape[::-1])))
-        ax = plt.gca()
+        ax = self.plt.gca()
         ax.contour(X,Y,data,levels=nlevels,cmap=cmap,**self.show_options)
     
     # ======================================================================= #
@@ -264,7 +273,7 @@ class fits(object):
         
         # draw
         edges = np.ma.masked_where(~edges,edges.astype(int))
-        plt.imshow(edges,alpha=alpha,cmap=cmap,**self.show_options)
+        self.plt.imshow(edges,alpha=alpha,cmap=cmap,**self.show_options)
         
     # ======================================================================= #
     def draw_sobel(self,alpha=1,cmap='Greys',imap=False):
@@ -280,7 +289,7 @@ class fits(object):
         if imap: cmap += '_r'
         
         # draw
-        plt.imshow(filters.sobel(self.data),alpha=alpha,cmap=cmap,**self.show_options)
+        self.plt.imshow(filters.sobel(self.data),alpha=alpha,cmap=cmap,**self.show_options)
     
     # ======================================================================= #
     def fit2D(self,function,**fitargs):
@@ -354,13 +363,13 @@ class fits(object):
         
         # draw output
         if draw:
-            plt.figure()    
+            self.plt.figure()    
             self.draw()
             contours = self.draw_2Dfit(gaussian2D,*par[:4],1,0,**fitargs)
             
-            plt.xlim((par[0]-4*par[2],par[0]+4*par[2]))
-            plt.ylim((par[1]-4*par[3],par[1]+4*par[3]))
-            plt.gca().clabel(contours,inline=True,fontsize='x-small',fmt='%g')
+            self.plt.xlim((par[0]-4*par[2],par[0]+4*par[2]))
+            self.plt.ylim((par[1]-4*par[3],par[1]+4*par[3]))
+            self.plt.gca().clabel(contours,inline=True,fontsize='x-small',fmt='%g')
     
         self.result_gaussian2D = df
         
@@ -407,23 +416,23 @@ class fits(object):
         
         # draw
         if draw:
-            plt.figure()
-            plt.plot(sumx*normx,label='x')
-            plt.plot(sumy*normy,label='y')
+            self.plt.figure()
+            self.plt.plot(sumx*normx,label='x')
+            self.plt.plot(sumy*normy,label='y')
             
             fitx = np.linspace(0,max(len(sumx),len(sumy)),5000)
-            plt.plot(fitx,gaus(fitx,*parx)*normx,color='k')
-            plt.plot(fitx,gaus(fitx,*pary)*normy,color='k')     
-            plt.legend()
+            self.plt.plot(fitx,gaus(fitx,*parx)*normx,color='k')
+            self.plt.plot(fitx,gaus(fitx,*pary)*normy,color='k')     
+            self.plt.legend()
             
-            plt.figure()
-            plt.imshow(data,cmap='Greys_r',**self.show_options)
-            plt.errorbar(parx[0],pary[0],xerr=2*parx[1],yerr=2*pary[1],fmt='o',
+            self.plt.figure()
+            self.plt.imshow(data,cmap='Greys_r',**self.show_options)
+            self.plt.errorbar(parx[0],pary[0],xerr=2*parx[1],yerr=2*pary[1],fmt='o',
                           fillstyle='none',markersize=9)
                           
             if pary[1] > 2 and parx[1] > 2:
-                plt.ylim(pary[0]-pary[1]*6,pary[0]+pary[1]*6)   
-                plt.xlim(parx[0]-parx[1]*6,parx[0]+parx[1]*6)
+                self.plt.ylim(pary[0]-pary[1]*6,pary[0]+pary[1]*6)   
+                self.plt.xlim(parx[0]-parx[1]*6,parx[0]+parx[1]*6)
                 
                 
         self.result_center = ((parx[0],pary[0],parx[1],pary[1]),
@@ -459,9 +468,9 @@ class fits(object):
 
         # draw
         if draw:
-            plt.figure()
-            plt.imshow(data,cmap='Greys_r',**self.show_options)
-            plt.plot(cx,cy,'x')
+            self.plt.figure()
+            self.plt.imshow(data,cmap='Greys_r',**self.show_options)
+            self.plt.plot(cx,cy,'x')
                 
         self.result_cm = ((cx,cy),('x0','y0'))
         

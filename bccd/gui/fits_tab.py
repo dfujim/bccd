@@ -27,6 +27,7 @@ class fits_tab(object):
             bccd: pointer to top level
             black: StringVar, black level
             filename: name of .fits file
+            id: id number for later deletion (key in bccd.tabs)
             input_names: dict, map input names to nice titles
             input_objs: dict of objects corresponding to input fields 
                              {input_name:(value,field,label)}
@@ -50,9 +51,10 @@ class fits_tab(object):
                 )
     
     # ======================================================================= #
-    def __init__(self, bccd, tab_frame, filename):
+    def __init__(self, bccd, tab_frame, filename, id):
         
         # inputs
+        self.id = id
         self.bccd = bccd
         self.plt = bccd.plt
         self.tab_frame = tab_frame
@@ -170,8 +172,19 @@ class fits_tab(object):
     
     # ======================================================================= #
     def close(self):
-        pass
-        # ~ self.tab_frame.destroy()
+        """Remove the tab"""
+        
+        selected = self.bccd.notebook.select()
+        self.bccd.notebook.forget(selected)
+        self.tab_frame.destroy()
+        
+        for item in self.bccd.notebook.winfo_children():
+            if str(item)==selected:
+                item.destroy()       
+                break
+        
+        del self.bccd.tabs[self.id]
+
     
     # ======================================================================= #
     def change_draw_fn(self, event, frame, row):
@@ -227,8 +240,6 @@ class fits_tab(object):
             returns: final row
             adds items to self.input_objs
         """
-        
-        print()
         
         # setup
         style = self.style.get()

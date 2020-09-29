@@ -88,6 +88,7 @@ class bccd(object):
         root.bind('<Control-Key-8>',lambda x: self.key_ctrl_n(7))
         root.bind('<Control-Key-9>',lambda x: self.key_ctrl_n(8))
         root.bind('<Control-Key-0>',lambda x: self.key_ctrl_n(9))
+        root.bind('<Control-w>',self.key_ctrl_w)
         
         # styling
         root.option_add('*tearOff', FALSE)
@@ -214,7 +215,7 @@ class bccd(object):
         tab_frame = ttk.Frame(self.notebook, pad=5)
         self.notebook.add(tab_frame, text='Img %d' % new_key)
         
-        self.tabs[new_key] = fits_tab(wref.proxy(self), tab_frame, filename)
+        self.tabs[new_key] = fits_tab(wref.proxy(self), tab_frame, filename, new_key)
         self.notebook.select(len(self.tabs)-1)
         
     # ======================================================================= #
@@ -297,26 +298,50 @@ class bccd(object):
     
     # ====================================================================== #
     def key_ctrl_n(self,n,*args):
-        """Bound to <Control-Key-#>"""
-        self.notebook.select(n)
+        """
+            Bound to <Control-Key-#>
+            Switch to tab n
+        """
+        try:
+            self.notebook.select(n)
+        except Exception:
+            pass
         
     # ====================================================================== #
     def key_ctrl_return(self,*args):
-        """Bound to <Control-Key-Return> and <Control-Key-KP_Enter>"""
+        """
+            Bound to <Control-Key-Return> and <Control-Key-KP_Enter>
+            Draws in open window
+        """
         idx = self.notebook.index('current')
         tab = self.tabs[idx]
         tab.draw()
         
     # ====================================================================== #
+    def key_ctrl_w(self,*args):
+        """
+            Bound to <Control-Key-w>. 
+            Closes the open tab
+        """
+        idx = self.notebook.index('current')
+        self.tabs[idx].close()
+        
+    # ====================================================================== #
     def key_shift_return(self,*args):
-        """Bound to <Shift-Key-Return> and <Shift-Key-KP_Enter>"""
+        """
+            Bound to <Shift-Key-Return> and <Shift-Key-KP_Enter>.
+            Draws in new window
+        """
         idx = self.notebook.index('current')
         tab = self.tabs[idx]
         tab.draw_new()        
         
     # ====================================================================== #
     def key_return(self,*args):
-        """Bound to <Return> and <KP_Enter>"""
+        """
+            Bound to <Return> and <KP_Enter>
+            Add last image
+        """
         self.addlast_file()
     
     # ====================================================================== #

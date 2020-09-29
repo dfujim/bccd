@@ -50,7 +50,6 @@ class PltTracker(object):
         """
             Function wrapper
             
-            style: one of "data", "fit", "param"
             fn: matplotlib function to operate on 
             args: passed to fn
             kwargs: passed to fn
@@ -160,7 +159,6 @@ class PltTracker(object):
             Update the active figure id based on click event.
         """
         number = event.canvas.figure.number
-        style = event.canvas.style
         self.active = number
     
     # ======================================================================= #
@@ -214,7 +212,6 @@ class PltTracker(object):
         """
             Plot data.
             
-            style: one of "data", "fit", or "param"
             annot_label: list of annotations for each point
             other arguments: defaults for matplotlib.pyplot.plot
         """
@@ -224,7 +221,7 @@ class PltTracker(object):
         
         # make new figure if needed 
         if active_style == 0:   
-            self.figure(style)
+            self.figure()
             active_style = self.active
         fig = plt.figure(active_style)
         ax = fig.axes[0]
@@ -263,7 +260,6 @@ class PltTracker(object):
         """
             Make new figure.
             
-            style: one of "data", "fit", or "param"
             kwargs: keyword arguments to pass to plt.figure
         """
         
@@ -355,7 +351,6 @@ class PltTracker(object):
         """
             Plot data.
             
-            style: one of "data", "fit", or "param"
             other arguments: defaults for matplotlib.pyplot.plot
         """
         

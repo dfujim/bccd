@@ -71,6 +71,24 @@ class bccd(object):
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
         
+        # hotkeys
+        root.bind('<Return>',self.key_return)             
+        root.bind('<KP_Enter>',self.key_return)
+        root.bind('<Control-Key-Return>',self.key_ctrl_return)      
+        root.bind('<Control-Key-KP_Enter>',self.key_ctrl_return)
+        root.bind('<Shift-Key-Return>',self.key_shift_return)
+        root.bind('<Shift-Key-KP_Enter>',self.key_shift_return)
+        root.bind('<Control-Key-1>',lambda x: self.key_ctrl_n(0))
+        root.bind('<Control-Key-2>',lambda x: self.key_ctrl_n(1))
+        root.bind('<Control-Key-3>',lambda x: self.key_ctrl_n(2))
+        root.bind('<Control-Key-4>',lambda x: self.key_ctrl_n(3))
+        root.bind('<Control-Key-5>',lambda x: self.key_ctrl_n(4))
+        root.bind('<Control-Key-6>',lambda x: self.key_ctrl_n(5))
+        root.bind('<Control-Key-7>',lambda x: self.key_ctrl_n(6))
+        root.bind('<Control-Key-8>',lambda x: self.key_ctrl_n(7))
+        root.bind('<Control-Key-9>',lambda x: self.key_ctrl_n(8))
+        root.bind('<Control-Key-0>',lambda x: self.key_ctrl_n(9))
+        
         # styling
         root.option_add('*tearOff', FALSE)
         root.option_add("*Font", colors.font)
@@ -153,7 +171,6 @@ class bccd(object):
         menu_file.add_command(label='Exit', command=sys.exit)
         menubar.add_cascade(menu=menu_file, label='File')
         
-        
         # Top Notebook --------------------------------------------------------
         noteframe = ttk.Frame(self.mainframe, relief='sunken', pad=5)
         self.notebook = ttk.Notebook(noteframe)
@@ -194,10 +211,11 @@ class bccd(object):
         else:
             new_key = 0
         
-        tab_frame = ttk.Frame(self.notebook)
+        tab_frame = ttk.Frame(self.notebook, pad=5)
         self.notebook.add(tab_frame, text='Img %d' % new_key)
         
         self.tabs[new_key] = fits_tab(wref.proxy(self), tab_frame, filename)
+        self.notebook.select(len(self.tabs)-1)
         
     # ======================================================================= #
     def add_file(self):
@@ -206,7 +224,7 @@ class bccd(object):
         """
         
         # get data
-        # ~ self.get_data()
+        self.get_data()
         
         # get filename from browser
         imgfile = filedialog.askopenfilename(initialdir=self.cwd,
@@ -226,6 +244,9 @@ class bccd(object):
             Add tab based on last modified file
             
         """
+        
+        # get data
+        self.get_data()
         
         # get filenames of all files in directory system and their modification 
         # times
@@ -257,8 +278,8 @@ class bccd(object):
     def close_all(self):
         """Close all open figures"""
         plt.close('all')
-        # ~ for k in self.plt.plots:    self.plt.plots[k] = []
-        # ~ for k in self.plt.active:   self.plt.active[k] = 0
+        self.plt.plots = []
+        self.plt.active = 0
 
     # ====================================================================== #
     def get_data(self):
@@ -271,13 +292,38 @@ class bccd(object):
             os.makedirs(dest, exist_ok=True)
             
             # rsync
-            subprocess.call(['rsync', '-avz', '--min-size=1', os.path.join(loc,'*'), dest])
+            print("Fetching data from %s..." % dest)
+            subprocess.call(['rsync', '-az', '--min-size=1', os.path.join(loc,'*'), dest])
+    
+    # ====================================================================== #
+    def key_ctrl_n(self,n,*args):
+        """Bound to <Control-Key-#>"""
+        self.notebook.select(n)
+        
+    # ====================================================================== #
+    def key_ctrl_return(self,*args):
+        """Bound to <Control-Key-Return> and <Control-Key-KP_Enter>"""
+        idx = self.notebook.index('current')
+        tab = self.tabs[idx]
+        tab.draw()
+        
+    # ====================================================================== #
+    def key_shift_return(self,*args):
+        """Bound to <Shift-Key-Return> and <Shift-Key-KP_Enter>"""
+        idx = self.notebook.index('current')
+        tab = self.tabs[idx]
+        tab.draw_new()        
+        
+    # ====================================================================== #
+    def key_return(self,*args):
+        """Bound to <Return> and <KP_Enter>"""
+        self.addlast_file()
     
     # ====================================================================== #
     def on_closing(self):
         """Excecute this when window is closed: destroy and close all plots."""
         # ~ self.logger.info('Closing all windows.')
-        # ~ plt.close('all')
+        plt.close('all')
         self.root.destroy()
         # ~ self.logger.info('Finished     ' + '-'*50)
     
@@ -287,7 +333,7 @@ class bccd(object):
             Load all internal variables from save file
         """
         pass
-    
+        
     # ====================================================================== #
     def save(self):
         """

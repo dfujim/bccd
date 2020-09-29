@@ -276,7 +276,7 @@ class fits(object):
         
         # draw
         edges = np.ma.masked_where(~edges,edges.astype(int))
-        self.plt.imshow(edges,alpha=alpha,cmap=cmap,**self.show_options)
+        self.plt.imshow(self.filename, edges, alpha=alpha, cmap=cmap, **self.show_options)
         
     # ======================================================================= #
     def draw_sobel(self,alpha=1,cmap='Greys',imap=False):
@@ -292,7 +292,11 @@ class fits(object):
         if imap: cmap += '_r'
         
         # draw
-        self.plt.imshow(filters.sobel(self.data),alpha=alpha,cmap=cmap,**self.show_options)
+        self.plt.imshow(self.filename, 
+                        filters.sobel(self.data),
+                        alpha=alpha,
+                        cmap=cmap,
+                        **self.show_options)
     
     # ======================================================================= #
     def fit2D(self,function,**fitargs):
@@ -429,7 +433,7 @@ class fits(object):
             self.plt.legend()
             
             self.plt.figure()
-            self.plt.imshow(data,cmap='Greys_r',**self.show_options)
+            self.plt.imshow(self.filename,data,cmap='Greys_r',**self.show_options)
             self.plt.errorbar(parx[0],pary[0],xerr=2*parx[1],yerr=2*pary[1],fmt='o',
                           fillstyle='none',markersize=9)
                           
@@ -472,7 +476,7 @@ class fits(object):
         # draw
         if draw:
             self.plt.figure()
-            self.plt.imshow(data,cmap='Greys_r',**self.show_options)
+            self.plt.imshow(self.filename,data,cmap='Greys_r',**self.show_options)
             self.plt.plot(cx,cy,'x')
                 
         self.result_cm = ((cx,cy),('x0','y0'))

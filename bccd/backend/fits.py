@@ -22,6 +22,7 @@ from skimage.transform import hough_circle,hough_circle_peaks
 from skimage.transform import probabilistic_hough_line
 from skimage.transform import rescale
 
+plt_global = PltTracker()
 
 # =========================================================================== #
 class fits(object):
@@ -71,7 +72,7 @@ class fits(object):
         self.set_mask(None)
         
         if plt is None:
-            self.plt = PltTracker()
+            self.plt = plt_global
         else:
             self.plt = plt
             
@@ -247,7 +248,9 @@ class fits(object):
         # draw
         X,Y = np.meshgrid(*tuple(map(np.arange,data.shape[::-1])))
         ax = self.plt.gca()
-        ax.contour(X,Y,data,levels=nlevels,cmap=cmap,**self.show_options)
+        
+        options = {k:val for k,val in self.show_options.items() if k != "interpolation"}
+        ax.contour(X,Y,data,levels=nlevels,cmap=cmap,**options)
     
     # ======================================================================= #
     def draw_edges(self,sigma=1,alpha=1,cmap='Greys',imap=True):

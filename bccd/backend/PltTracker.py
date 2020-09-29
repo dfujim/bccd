@@ -42,6 +42,7 @@ class PltTracker(object):
         # reset active
         try:
             self.active = self.plots[-1]
+            plt.figure(self.active)
         except IndexError:
             self.active = 0
                         

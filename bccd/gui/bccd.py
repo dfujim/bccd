@@ -40,7 +40,7 @@ class bccd(object):
             
             mainframe: frame for root
             notebook: notebook for adding files
-            tabs: dict of fits_tabs objects which have been fetched {number:fits_tabs}
+            tabs: list of fits_tabs objects which have been fetched fits_tabs
     """
     
     # image fetch locations
@@ -76,8 +76,6 @@ class bccd(object):
         root.bind('<KP_Enter>',self.key_return)
         root.bind('<Control-Key-Return>',self.key_ctrl_return)      
         root.bind('<Control-Key-KP_Enter>',self.key_ctrl_return)
-        root.bind('<Shift-Key-Return>',self.key_shift_return)
-        root.bind('<Shift-Key-KP_Enter>',self.key_shift_return)
         root.bind('<Control-Key-1>',lambda x: self.key_ctrl_n(0))
         root.bind('<Control-Key-2>',lambda x: self.key_ctrl_n(1))
         root.bind('<Control-Key-3>',lambda x: self.key_ctrl_n(2))
@@ -89,6 +87,8 @@ class bccd(object):
         root.bind('<Control-Key-9>',lambda x: self.key_ctrl_n(8))
         root.bind('<Control-Key-0>',lambda x: self.key_ctrl_n(9))
         root.bind('<Control-w>',self.key_ctrl_w)
+        root.bind('<Control-o>',self.key_ctrl_o)
+        root.bind('<Control-l>',self.key_ctrl_l)
         
         # styling
         root.option_add('*tearOff', FALSE)
@@ -197,8 +197,8 @@ class bccd(object):
         # make data directory
         os.makedirs(self.data_local, exist_ok=True)
         
-        # intialize tabs dict
-        self.tabs = {}
+        # intialize tabs list
+        self.tabs = []
 
         # runloop
         self.root.mainloop()
@@ -206,16 +206,15 @@ class bccd(object):
     # ======================================================================= #
     def _add_tab(self, filename):
         
-        keys = list(self.tabs.keys())
-        if len(keys) > 0:
-            new_key = max(keys)+1
+        if len(self.tabs) > 0:
+            new_key = max([t.id for t in self.tabs])+1
         else:
             new_key = 0
         
         tab_frame = ttk.Frame(self.notebook, pad=5)
         self.notebook.add(tab_frame, text='Img %d' % new_key)
         
-        self.tabs[new_key] = fits_tab(wref.proxy(self), tab_frame, filename, new_key)
+        self.tabs.append(fits_tab(wref.proxy(self), tab_frame, filename, new_key))
         self.notebook.select(len(self.tabs)-1)
         
     # ======================================================================= #
@@ -228,16 +227,17 @@ class bccd(object):
         self.get_data()
         
         # get filename from browser
-        imgfile = filedialog.askopenfilename(initialdir=self.cwd,
+        imgfiles = filedialog.askopenfilenames(initialdir=self.cwd,
                                             title='Select CCD Image',
                                             filetypes=(('fits','*.fits'),('All','*')))
-        if not imgfile:
+        
+        if not imgfiles:
             return
-                                            
-        self.cwd = os.path.split(os.path.abspath(imgfile))[0]
         
         # add tab
-        self._add_tab(imgfile)
+        for imgfile in imgfiles:                                    
+            self.cwd = os.path.split(os.path.abspath(imgfile))[0]            
+            self._add_tab(imgfile)
         
     # ======================================================================= #
     def addlast_file(self):
@@ -296,6 +296,14 @@ class bccd(object):
             print("Fetching data from %s..." % loc)
             subprocess.call(['rsync', '-az', '--min-size=1', os.path.join(loc,'*'), dest])
     
+        # ====================================================================== #
+    def key_ctrl_l(self,*args):
+        """
+            Bound to <Control-Key-l>. 
+            Open latest file
+        """
+        self.addlast_file()
+    
     # ====================================================================== #
     def key_ctrl_n(self,n,*args):
         """
@@ -308,12 +316,25 @@ class bccd(object):
             pass
         
     # ====================================================================== #
+    def key_ctrl_o(self,*args):
+        """
+            Bound to <Control-Key-o>
+            Open file browser
+        """
+        self.add_file()
+        
+    # ====================================================================== #
     def key_ctrl_return(self,*args):
         """
             Bound to <Control-Key-Return> and <Control-Key-KP_Enter>
             Add last image
         """
-        self.addlast_file()
+        try:
+            idx = self.notebook.index('current')
+        except:
+            return
+        tab = self.tabs[idx]
+        tab.draw_new()     
         
     # ====================================================================== #
     def key_ctrl_w(self,*args):
@@ -326,19 +347,6 @@ class bccd(object):
         except:
             return
         self.tabs[idx].close()
-        
-    # ====================================================================== #
-    def key_shift_return(self,*args):
-        """
-            Bound to <Shift-Key-Return> and <Shift-Key-KP_Enter>.
-            Draws in new window
-        """
-        try:
-            idx = self.notebook.index('current')
-        except:
-            return
-        tab = self.tabs[idx]
-        tab.draw_new()        
         
     # ====================================================================== #
     def key_return(self,*args):

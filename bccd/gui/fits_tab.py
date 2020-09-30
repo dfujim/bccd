@@ -227,8 +227,10 @@ class fits_tab(object):
                 item.destroy()       
                 break
         
-        del self.bccd.tabs[self.id]
-
+        for i,tab in enumerate(self.bccd.tabs):
+            if tab is self:
+                del self.bccd.tabs[i]
+                break
     
     # ======================================================================= #
     def change_draw_fn(self, event, frame, row):

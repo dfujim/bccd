@@ -38,17 +38,62 @@ class fits_tab(object):
             tab_frame: tkk.Frame; top level frame for this tab
     """
     
-    colours = ( 'Greys','Reds','Blues','Greens','Purples','Oranges','Yellows',
-                'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
-                'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn',
-                'viridis', 'plasma', 'inferno', 'magma', 'cividis',
-                'binary', 'gist_yarg', 'gist_gray', 'gray', 'bone', 'pink',
-                'spring', 'summer', 'autumn', 'winter', 'cool', 'Wistia',
-                'hot', 'afmhot', 'gist_heat', 'copper',
-                'PiYG', 'PRGn', 'BrBG', 'PuOr', 'RdGy', 'RdBu',
-                'RdYlBu', 'RdYlGn', 'Spectral', 'coolwarm', 'bwr', 'seismic',
-                'twilight', 'twilight_shifted', 'hsv'
-                )
+    # (color, inverted)
+    colours =  {'Greys':       True,
+                'Reds':        True,
+                'Blues':       True,
+                'Greens':      True,
+                'Purples':     True,
+                'Oranges':     True,
+                'viridis':     False,
+                'plasma':      False,
+                'inferno':     False,
+                'magma':       False,
+                'cividis':     False,
+                'hot':         False,
+                'afmhot':      False,
+                'gist_heat':   False,
+                'YlOrBr':      True,
+                'YlOrRd':      True,
+                'OrRd':        True,
+                'PuRd':        True,
+                'RdPu':        True,
+                'BuPu':        True,
+                'GnBu':        True,
+                'PuBu':        True,
+                'YlGnBu':      True,
+                'PuBuGn':      True,
+                'BuGn':        True,
+                'YlGn':        True,  
+                'binary':      True,
+                'gist_yarg':   True,
+                'gist_gray':   True,
+                'gray':        False,
+                'bone':        False,
+                'pink':        False,
+                'spring':      False,
+                'summer':      False,
+                'autumn':      False,
+                'winter':      False,
+                'cool':        True,
+                'Wistia':      True,
+                'copper':      False,
+                'PiYG':        True,
+                'PRGn':        True,
+                'BrBG':        True,
+                'PuOr':        True,
+                'RdGy':        True,
+                'RdBu':        True,
+                'RdYlBu':      True,
+                'RdYlGn':      True,
+                'Spectral':    False,
+                'coolwarm':    False,
+                'bwr':         False,
+                'seismic':     False,
+                'twilight':    True,
+                'twilight_shifted': False,
+                'hsv':         True,
+                }
     
     # ======================================================================= #
     def __init__(self, bccd, tab_frame, filename, id):
@@ -138,7 +183,6 @@ class fits_tab(object):
         combo_style.bind("<<ComboboxSelected>>", 
                          partial(self.change_draw_fn, frame=frame_column1, row=r))
         r = self.input_place(frame_column1,r)+1
-        
         
         # Draw buttons
         frame_draw = ttk.Frame(frame_column1)
@@ -265,8 +309,9 @@ class fits_tab(object):
                 value = StringVar()
                 element = ttk.Combobox(frame, textvariable=value, 
                                        state='readonly', width=20)
-                element['values'] = self.colours
-                value.set(self.colours[0])
+                element.bind("<<ComboboxSelected>>", self.set_imap)
+                element['values'] = tuple(self.colours.keys())
+                value.set(element['values'][0])
                 
             # number contours
             elif inpt == 'nlevels':
@@ -287,7 +332,7 @@ class fits_tab(object):
                 element = ttk.Checkbutton(frame, text=self.input_names[inpt],
                         variable=value, onvalue=False, offvalue=True,
                         pad=5)
-                value.set(True)
+                value.set(self.colours[self.input_objs['cmap'][0].get()])
                 
             # gaussian filter radius
             elif inpt == 'sigma':
@@ -334,5 +379,12 @@ class fits_tab(object):
     def remove(self):
         pass
     
-    
-    
+    # ======================================================================= #
+    def set_imap(self, *args):
+        """
+            Set imap based on color seclection
+        """
+        
+        imap = self.input_objs['imap'][0]
+        cmap = self.input_objs['cmap'][0]
+        imap.set(self.colours[cmap.get()])

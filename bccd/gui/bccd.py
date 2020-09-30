@@ -293,7 +293,7 @@ class bccd(object):
             os.makedirs(dest, exist_ok=True)
             
             # rsync
-            print("Fetching data from %s..." % dest)
+            print("Fetching data from %s..." % loc)
             subprocess.call(['rsync', '-az', '--min-size=1', os.path.join(loc,'*'), dest])
     
     # ====================================================================== #
@@ -311,11 +311,9 @@ class bccd(object):
     def key_ctrl_return(self,*args):
         """
             Bound to <Control-Key-Return> and <Control-Key-KP_Enter>
-            Draws in open window
+            Add last image
         """
-        idx = self.notebook.index('current')
-        tab = self.tabs[idx]
-        tab.draw()
+        self.addlast_file()
         
     # ====================================================================== #
     def key_ctrl_w(self,*args):
@@ -323,7 +321,10 @@ class bccd(object):
             Bound to <Control-Key-w>. 
             Closes the open tab
         """
-        idx = self.notebook.index('current')
+        try:
+            idx = self.notebook.index('current')
+        except:
+            return
         self.tabs[idx].close()
         
     # ====================================================================== #
@@ -332,7 +333,10 @@ class bccd(object):
             Bound to <Shift-Key-Return> and <Shift-Key-KP_Enter>.
             Draws in new window
         """
-        idx = self.notebook.index('current')
+        try:
+            idx = self.notebook.index('current')
+        except:
+            return
         tab = self.tabs[idx]
         tab.draw_new()        
         
@@ -340,9 +344,14 @@ class bccd(object):
     def key_return(self,*args):
         """
             Bound to <Return> and <KP_Enter>
-            Add last image
+            Draws in open window
         """
-        self.addlast_file()
+        try:
+            idx = self.notebook.index('current')
+        except:
+            return
+        tab = self.tabs[idx]
+        tab.draw()
     
     # ====================================================================== #
     def on_closing(self):
@@ -350,7 +359,6 @@ class bccd(object):
         # ~ self.logger.info('Closing all windows.')
         plt.close('all')
         self.root.destroy()
-        # ~ self.logger.info('Finished     ' + '-'*50)
     
     # ====================================================================== #
     def load(self):

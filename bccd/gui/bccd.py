@@ -213,7 +213,7 @@ class bccd(object):
             new_key = 0
         
         tab_frame = ttk.Frame(self.notebook, pad=5)
-        self.notebook.add(tab_frame, text='Img %d' % new_key)
+        self.notebook.add(tab_frame, text='Img %d' % (new_key+1))
         
         self.tabs.append(fits_tab(wref.proxy(self), tab_frame, filename, new_key))
         self.notebook.select(len(self.tabs)-1)

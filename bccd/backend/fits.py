@@ -250,7 +250,7 @@ class fits(object):
         ax = self.plt.gca()
         
         options = {k:val for k,val in self.show_options.items() if k != "interpolation"}
-        ax.contour(X,Y,data,levels=nlevels,cmap=cmap,**options)
+        self.plt.contour(self.filename,X,Y,data,levels=nlevels,cmap=cmap,**options)
     
     # ======================================================================= #
     def draw_edges(self,sigma=1,alpha=1,cmap='Greys',imap=True):

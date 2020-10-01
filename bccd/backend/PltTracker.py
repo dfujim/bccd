@@ -79,7 +79,6 @@ class PltTracker(object):
             Remove an object labelled by draw_id from the figure, based on draw 
             style.
         """
-        color=None
         
         # check if id is present in drawn data
         if draw_id in ax.draw_objs.keys():
@@ -91,22 +90,32 @@ class PltTracker(object):
                 try:
                     item[0].remove()
                 except TypeError:
-                    item.remove()
+                    try:
+                        item.remove()
+                    except AttributeError:
+                        pass
                 else: 
                     # remove errorbars
-                    if type(item) == mpl.container.ErrorbarContainer:    
+                    if type(item) is mpl.container.ErrorbarContainer:    
                         for i in item[1]:   i.remove()
                         for i in item[2]:   i.remove()
                         del ax.containers[ax.containers.index(item)]
                         
                     # remove lines
-                    else:
-                        try:
-                            del ax.lines[ax.lines.index(item)]
-                        except ValueError:
-                            pass
-                del item 
-            
+                    elif type(item) is mpl.lines.Line2D:
+                        del ax.lines[ax.lines.index(item)]
+                        
+                    # remove images
+                    elif type(item) is mpl.image.AxesImage:
+                        del ax.image[ax.image.index(item)]
+                
+                if type(item) is mpl.contour.QuadContourSet:
+                    for coll in item.collections: 
+                        if coll in ax.collections:
+                            del ax.collections[ax.collections.index(coll)]
+                    
+            plt.draw()
+                
             # clear labels
             del ax.draw_objs[draw_id]
         
@@ -203,6 +212,30 @@ class PltTracker(object):
         out = self._decorator(plt.clf)
         ax = plt.gca()
         ax.draw_objs = {}
+        
+    # ======================================================================= # 
+    def contour(self, id, X, Y, Z, levels=5, unique=True, **kwargs):
+        
+        # get active for this style
+        active_style = self.active
+        
+        # make new figure if needed 
+        if active_style == 0:   
+            self.figure()
+            active_style = self.active
+        fig = plt.figure(active_style)
+        ax = fig.axes[0]
+        
+        # redraw old objects and lines
+        if unique:  self._remove_drawn_object(ax,id)
+        self._remove_drawn_object(ax,'line')
+        
+        obj = ax.contour(X, Y, Z, levels, **kwargs)
+        
+        # save the drawn object to the file
+        ax.draw_objs.setdefault(id,[]).append(obj)
+        
+        return obj
         
     # ======================================================================= # 
     def errorbar(self, id, x, y, yerr=None, xerr=None, fmt='', ecolor=None, 

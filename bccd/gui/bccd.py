@@ -295,6 +295,7 @@ class bccd(object):
             # rsync
             print("Fetching data from %s..." % loc)
             subprocess.call(['rsync', '-az', '--min-size=1', os.path.join(loc,'*'), dest])
+            
     
         # ====================================================================== #
     def key_ctrl_l(self,*args):

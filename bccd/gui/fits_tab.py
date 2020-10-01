@@ -26,6 +26,7 @@ class fits_tab(object):
             
             bccd: pointer to top level
             black: StringVar, black level
+            entry_black: Entry widget for black value
             filename: name of .fits file
             id: id number for later deletion (key in bccd.tabs)
             input_names: dict, map input names to nice titles
@@ -95,6 +96,12 @@ class fits_tab(object):
                 'hsv':         True,
                 }
     
+    input_names = {'alpha':'Alpha (%): ',
+                   'cmap':'Colour Map: ',
+                   'nlevels':'Num. Contours: ',
+                   'sigma':'Gaus. Filter Stdev.: ',
+                   'imap':'Invert Colour Map'}
+    
     # ======================================================================= #
     def __init__(self, bccd, tab_frame, filename, id):
         
@@ -121,13 +128,12 @@ class fits_tab(object):
                         'Gradient':     (self.img.draw_sobel,'alpha','cmap','imap'),
                         'Edges':        (self.img.draw_edges,'alpha','sigma','cmap','imap'),
                         }
-        self.style.set(list(self.styles.keys())[0])
-       
-        self.input_names = {'alpha':'Alpha (%): ',
-                            'cmap':'Colour Map: ',
-                            'nlevels':'Num. Contours: ',
-                            'sigma':'Gaus. Filter Stdev.: ',
-                            'imap':'Invert Colour Map'}
+                        
+        # set draw style to previous
+        if bccd.tabs:
+            self.style.set(bccd.tabs[-1].style.get())
+        else:
+            self.style.set(list(self.styles.keys())[0])
         
         self.input_objs = {}
        
@@ -174,10 +180,15 @@ class fits_tab(object):
         
         # black level
         label_black = ttk.Label(frame_column1,text='Black Value: ')
-        entry_black = ttk.Entry(frame_column1, textvariable=self.black, width=10)
+        frame_black = ttk.Frame(frame_column1)
+        self.entry_black = ttk.Entry(frame_black, textvariable=self.black, width=10)
+        button_black = ttk.Button(frame_black, text='Reset', width=8, 
+                                  command=self.reset_black)
         
         label_black.grid(column=0,row=r,sticky=W)
-        entry_black.grid(column=1,row=r,sticky=W); r+=1
+        frame_black.grid(column=1,row=r,sticky=W); r+=1
+        self.entry_black.grid(column=0,row=0,sticky=W)
+        button_black.grid(column=1,row=0,sticky=W, padx=2)
         
         # Inputs for draw style
         combo_style.bind("<<ComboboxSelected>>", 
@@ -191,9 +202,10 @@ class fits_tab(object):
         button_draw_new = ttk.Button(frame_draw,text='Draw New',command=self.draw_new)
         
     
-        frame_draw.grid(column=0,row=r,sticky=W,columnspan=2); r+=1
+        frame_draw.grid(column=0,row=r,sticky=(W,E,N),columnspan=2); r+=1
+        frame_draw.columnconfigure(1,weight=1)
         c = 0
-        button_remove.grid(column=c,row=0,sticky=W); c+=1
+        button_remove.grid(column=c,row=0,sticky=W); c+=2
         button_draw_super.grid(column=c,row=0,sticky=E); c+=1
         button_draw_new.grid(column=c,row=0,sticky=E); c+=1
                 
@@ -357,7 +369,6 @@ class fits_tab(object):
             
             # incrment the gridding row
             row += 1
-            
                 
         return row
         
@@ -379,8 +390,22 @@ class fits_tab(object):
         
     # ======================================================================= #
     def remove(self):
-        pass
+        """
+            Remove image from the active figure
+        """
+        self.plt._remove_drawn_object(self.plt.gca(),self.filename)
+        # ~ self.plt.
     
+    # ======================================================================= #
+    def reset_black(self):
+        """
+            Reset black to header value
+        """
+        black = self.img.header['BZERO']
+        self.entry_black.delete(0,END)
+        self.entry_black.insert(0,str(black))
+        self.black.set(str(black))
+        
     # ======================================================================= #
     def set_imap(self, *args):
         """

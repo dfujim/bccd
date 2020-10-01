@@ -33,6 +33,7 @@ class fits_tab(object):
             input_objs: dict of objects corresponding to input fields 
                              {input_name:(value,field,label)}
             img: fits image object
+            old_color: string, last color draw value
             plt: PltTracker obj, set to point at bccd.plt
             style: StringVar, drawing style
             styles: dict, map drawing style to draw function and input names
@@ -111,6 +112,7 @@ class fits_tab(object):
         self.plt = bccd.plt
         self.tab_frame = tab_frame
         self.filename = filename
+        self.old_color = tuple(self.colours.keys())[0]
 
         # read image
         img = fits(filename, plt=bccd.plt, rescale_pixels=bccd.rescale_pixels)
@@ -216,15 +218,6 @@ class fits_tab(object):
         # resizing
         tab_frame.grid_columnconfigure(9, weight=1)        # main area
         tab_frame.grid_rowconfigure(9,weight=1)            # main area
-
-    # ======================================================================= #
-    # ~ def _draw(self): pass
-    # ~ def _contour(self): pass
-    # ~ def _sobel(self): pass
-    # ~ def _edges(self): pass
-    # ~ def _circles(self): pass
-    # ~ def _lines(self): pass
-    # ~ def _hlines(self): pass
     
     # ======================================================================= #
     def close(self):
@@ -325,7 +318,7 @@ class fits_tab(object):
                                        state='readonly', width=20)
                 element.bind("<<ComboboxSelected>>", self.set_imap)
                 element['values'] = tuple(self.colours.keys())
-                value.set(element['values'][0])
+                value.set(self.old_color)
                 
             # number contours
             elif inpt == 'nlevels':
@@ -376,6 +369,8 @@ class fits_tab(object):
     def input_remove(self):
         """Remove draw function options"""
         
+        self.old_color = self.input_objs['cmap'][0].get()
+        
         for k,i in self.input_objs.items():
             i[1].grid_forget()
             i[2].grid_forget()
@@ -388,13 +383,13 @@ class fits_tab(object):
             
         self.input_objs = {}
         
+        
     # ======================================================================= #
     def remove(self):
         """
             Remove image from the active figure
         """
         self.plt._remove_drawn_object(self.plt.gca(),self.filename)
-        # ~ self.plt.
     
     # ======================================================================= #
     def reset_black(self):

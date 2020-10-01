@@ -22,6 +22,7 @@ import logging
 from bccd import __version__, logger_name, icon_path
 from bccd.backend.PltTracker import PltTracker
 from bccd.gui.fits_tab import fits_tab
+from bccd.gui.popup_target import popup_target
 import bccd.backend.colors as colors
 
 # interactive plotting
@@ -273,7 +274,7 @@ class bccd(object):
         """
             Add new target to drawn windows
         """
-        pass
+        popup_target(self)
         
     # ======================================================================= #
     def close_all(self):
@@ -296,8 +297,7 @@ class bccd(object):
             print("Fetching data from %s..." % loc)
             subprocess.call(['rsync', '-az', '--min-size=1', os.path.join(loc,'*'), dest])
             
-    
-        # ====================================================================== #
+    # ====================================================================== #
     def key_ctrl_l(self,*args):
         """
             Bound to <Control-Key-l>. 

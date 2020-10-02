@@ -33,6 +33,7 @@ class fits_tab(object):
             input_objs: dict of objects corresponding to input fields 
                              {input_name:(value,field,label)}
             img: fits image object
+            old_alpha: int, last alpha draw value
             old_color: string, last color draw value
             plt: PltTracker obj, set to point at bccd.plt
             style: StringVar, drawing style
@@ -113,6 +114,7 @@ class fits_tab(object):
         self.tab_frame = tab_frame
         self.filename = filename
         self.old_color = tuple(self.colours.keys())[0]
+        self.old_alpha = 100
 
         # read image
         img = fits(filename, plt=bccd.plt, rescale_pixels=bccd.rescale_pixels)
@@ -306,7 +308,7 @@ class fits_tab(object):
                 label = ttk.Label(frame, text=self.input_names[inpt])
                 value = IntVar()
                 element = Spinbox(frame, textvariable=value, width=5, from_=0, to=100)
-                value.set(100)
+                value.set(self.old_alpha)
                 
             # colour map
             elif inpt == 'cmap':
@@ -370,6 +372,11 @@ class fits_tab(object):
         """Remove draw function options"""
         
         self.old_color = self.input_objs['cmap'][0].get()
+        
+        try:
+            self.old_alpha = self.input_objs['alpha'][0].get()
+        except KeyError:
+            pass
         
         for k,i in self.input_objs.items():
             i[1].grid_forget()

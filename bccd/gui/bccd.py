@@ -218,6 +218,14 @@ class bccd(object):
         self.tabs.append(fits_tab(wref.proxy(self), tab_frame, filename, new_key))
         self.notebook.select(len(self.tabs)-1)
         
+        # set alpha to prior image value
+        try:
+            alpha = self.tabs[-2].input_objs['alpha'][0].get()
+        except (KeyError,IndexError):
+            alpha = self.tabs[-2].old_alpha
+        else:
+            self.tabs[-1].input_objs['alpha'][0].set(alpha)
+        
     # ======================================================================= #
     def add_file(self):
         """

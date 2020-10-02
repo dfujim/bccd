@@ -44,6 +44,7 @@ class fits_tab(object):
     # (color, inverted)
     colours =  {'Greys':       True,
                 'twilight':    True,
+                'seismic':     False,
                 'Reds':        True,
                 'Blues':       True,
                 'Greens':      True,
@@ -93,7 +94,6 @@ class fits_tab(object):
                 'Spectral':    False,
                 'coolwarm':    False,
                 'bwr':         False,
-                'seismic':     False,
                 'twilight_shifted': False,
                 'hsv':         True,
                 }

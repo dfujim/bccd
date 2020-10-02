@@ -34,6 +34,8 @@ class popup_target(object):
                 'C8':'#bcbd22',
                 'C9':'#17becf',
                 }
+                
+    shapes = ('circle','square','ellipsis','rectangle')
 
     # ====================================================================== #
     def __init__(self, bccd):
@@ -69,22 +71,51 @@ class popup_target(object):
         frame_col1 = ttk.Frame(win, relief='sunken', pad=5)
         frame_col1.grid(column=1, row=0, sticky=(N,S,E,W), padx=5, pady=5)
         
+        # draw shape radio buttons
         self.shape = StringVar()
-        R1 = ttk.Radiobutton(frame_col1, text="Circle", variable=self.shape, 
-                            value='circle', selectcolor=colors.selected)
-        R2 = ttk.Radiobutton(frame_col1, text="Square", variable=self.shape, 
-                            value='square')
-        R3 = ttk.Radiobutton(frame_col1, text="Ellipsis", variable=self.shape, 
-                            value='ellipsis')
-        R4 = ttk.Radiobutton(frame_col1, text="Rectangle", variable=self.shape, 
-                            value='rectangle')
-        
-        R1.grid(column=0, row=0, sticky=(N,E,W))
-        R2.grid(column=0, row=1, sticky=(N,E,W))
-        R3.grid(column=0, row=2, sticky=(N,E,W))
-        R4.grid(column=0, row=3, sticky=(N,E,W))
+        radios = []
+        for i,v in enumerate(self.shapes):
+            rad = ttk.Radiobutton(frame_col1, 
+                            text=v.title().rjust(max([len(s) for s in self.shapes])), 
+                            variable=self.shape, 
+                            value=v)
+            rad.grid(column=0, row=i, sticky=(N,W))
+            radios.append(rad)
+            frame_col1.rowconfigure(i,weight=1)
+            
+            
+        self.shape.set(self.shapes[0])
         
         self.win = win
+        
+        # Row2 ----------------------------------------------------------
+        
+        frame_row2 = ttk.Frame(win, relief='sunken', pad=5)
+        frame_row2.grid(column=0, row=1, sticky=(N,S,E,W), padx=5, pady=5, columnspan=2)
+        frame_row2.columnconfigure(0,weight=1)
+        frame_row2.columnconfigure(1,weight=1)
+        
+        # buttons
+        button_draw = ttk.Button(frame_row2, text='Draw', command=self.draw)
+        button_remove = ttk.Button(frame_row2, text='Remove', command=self.remove)
+        
+        button_draw.grid(column=1,   row=0, sticky=(N,E,W,S))
+        button_remove.grid(column=0, row=0, sticky=(N,E,W,S))
+        
+        
+    # ====================================================================== #
+    def draw(self):
+        """
+            Add the target to the open figure
+        """
+        pass
+    
+    # ====================================================================== #
+    def remove(self):
+        """
+            Remove the target from the open figure
+        """
+        pass
         
     # ====================================================================== #
     def set_frame_color(self, color='#FFFFFF'):

@@ -220,9 +220,12 @@ class bccd(object):
         
         # set alpha to prior image value
         try:
-            alpha = self.tabs[-2].input_objs['alpha'][0].get()
-        except (KeyError,IndexError):
-            alpha = self.tabs[-2].old_alpha
+            tab = self.tabs[-2]
+            alpha = tab.input_objs['alpha'][0].get()
+        except KeyError:
+            alpha = tab.old_alpha
+        except IndexError:
+            pass
         else:
             self.tabs[-1].input_objs['alpha'][0].set(alpha)
         

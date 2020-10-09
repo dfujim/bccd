@@ -154,7 +154,8 @@ class fits(object):
         """
         
         # get raw data
-        self.data = data
+        data = np.copy(self.data)
+        data[self.data.mask] = self.black
         
         # get edges
         edges = canny(data,sigma=sigma, low_threshold=0, high_threshold=1)
@@ -169,9 +170,9 @@ class fits(object):
         
         # draw
         if draw:
-            self.plt.imshow(data,alpha=1,cmap='Greys_r',**self.show_options)
+            self.plt.imshow(self.filename,data,alpha=1,cmap='Greys_r',**self.show_options)
             edges = np.ma.masked_where(~edges,edges.astype(int))
-            self.plt.imshow(edges,alpha=1,cmap='Reds_r',**self.show_options)
+            self.plt.imshow(self.filename+'edges',edges,alpha=1,cmap='Reds_r',**self.show_options)
             
             for center_y, center_x, radius in zip(cy, cx, radii):
                 circle = Circle((center_x,center_y),radius,
@@ -292,12 +293,17 @@ class fits(object):
         if imap: cmap += '_r'
         
         # draw
+        data = np.copy(self.data)
+        sbl = filters.sobel(data)
+        sbl[self.data.mask]=0
         self.plt.imshow(self.filename, 
-                        filters.sobel(self.data),
+                        sbl,
                         alpha=alpha,
                         cmap=cmap,
                         **self.show_options)
     
+        return sbl
+        
     # ======================================================================= #
     def fit2D(self,function,**fitargs):
         """
@@ -315,7 +321,7 @@ class fits(object):
         flat = np.ravel(data)
         
         # get number of fit parameters (first two are x,y)
-        npar = len(function.__code__.co_varnames)-2
+        npar = function.__code__.co_argcount-2
         if 'p0' not in fitargs:
             fitargs['p0'] = np.ones(npar)
             
@@ -590,7 +596,7 @@ class fits(object):
         # masking
         if mask is not None:     
             window = np.ones(self.data.shape)
-            rr,cc = ski.draw.circle(mask[1],mask[0],mask[2],shape=data.shape)
+            rr,cc = ski.draw.disk((mask[1],mask[0]),mask[2],shape=data.shape)
             window[rr,cc] = 0
             data = np.ma.array(data,mask=window)
         

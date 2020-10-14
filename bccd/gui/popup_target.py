@@ -7,6 +7,8 @@ from tkinter import ttk
 import textwrap
 
 from bccd.backend import colors
+from bccd.backend.Target import Circle, Square, Rectangle#, Ellipsis
+
 
 # ========================================================================== #
 class popup_target(object):
@@ -14,9 +16,14 @@ class popup_target(object):
         Popup window for setting targeting options. 
         
         Data fields: 
-            win: toplevel window
+            ax_list: list of axes on which the current target is drawn
+            color: string. matplotlib color 
             frame_color: tk frame for showing the color of the target lines
+            radios: list of radio buttons
+            result_label: ttk.label object for showing target info
             shape: StringVar, stores shape to draw
+            target: Target object
+            win: toplevel window
     """
 
     description = '\n'.join(textwrap.wrap("Draw a shape in the active figure, "+\
@@ -38,19 +45,26 @@ class popup_target(object):
     shapes = ('circle','square','ellipsis','rectangle')
 
     # ====================================================================== #
-    def __init__(self, bccd):
+    def __init__(self, bccd, color='C0'):
         self.bccd = bccd
+        self.color = color
+        self.ax_list = []
         
         # make a new window
         win = Toplevel(bccd.mainframe)
         win.title('Set and Draw Target')
         
+        # target
+        self.target = None
+        
         # icon
         # ~ parent.set_icon(self.win)
         
         # Key bindings
-        # ~ self.win.bind('<Return>',self.set)             
-        # ~ self.win.bind('<KP_Enter>',self.set)
+        win.bind('<Return>',self.draw)             
+        win.bind('<KP_Enter>',self.draw)
+    
+        win.protocol("WM_DELETE_WINDOW", self.on_closing)
     
         # Column0 ----------------------------------------------------------
         frame_col0 = ttk.Frame(win, relief='sunken', pad=5)
@@ -61,11 +75,15 @@ class popup_target(object):
         self.frame_color.grid(column=0,row=0,sticky=(N,W,S,E), padx=10, pady=10)
         self.frame_color.columnconfigure(0,weight=1)
         self.frame_color.rowconfigure(0,weight=1)
-        self.set_frame_color()
+        self.set_frame_color(self.colors[self.color])
         
         # Header
         ttk.Label(frame_col0, text=self.description).grid(column=0, row=1,
                   sticky=(N,W), padx=10, pady=10)
+        
+        # target info label
+        self.result_label = ttk.Label(frame_col0, text='')
+        self.result_label.grid(column=0, row=2, sticky=(N,W), padx=10, pady=10)
         
         # Column1 ----------------------------------------------------------
         frame_col1 = ttk.Frame(win, relief='sunken', pad=5)
@@ -73,20 +91,17 @@ class popup_target(object):
         
         # draw shape radio buttons
         self.shape = StringVar()
-        radios = []
+        self.radios = []
         for i,v in enumerate(self.shapes):
             rad = ttk.Radiobutton(frame_col1, 
                             text=v.title().rjust(max([len(s) for s in self.shapes])), 
                             variable=self.shape, 
                             value=v)
             rad.grid(column=0, row=i, sticky=(N,W))
-            radios.append(rad)
+            self.radios.append(rad)
             frame_col1.rowconfigure(i,weight=1)
             
-            
         self.shape.set(self.shapes[0])
-        
-        self.win = win
         
         # Row2 ----------------------------------------------------------
         
@@ -102,13 +117,27 @@ class popup_target(object):
         button_draw.grid(column=1,   row=0, sticky=(N,E,W,S))
         button_remove.grid(column=0, row=0, sticky=(N,E,W,S))
         
+        self.win = win
         
     # ====================================================================== #
-    def draw(self):
+    def draw(self,*args):
         """
             Add the target to the open figure
+            Disable the radio buttons
+            Create the target object
         """
-        pass
+        
+        # disable the radio buttons
+        for r in self.radios:
+            r.config(state='disabled')
+        
+        if self.target is None:
+            if self.shape.get() == 'circle':
+                self.target = Circle(self, self.color, self.result_label, 250, 185, 50)  
+            else: 
+                raise RuntimeError("Undefined shape")
+        
+        self.target.draw(self.bccd.plt.gca())
     
     # ====================================================================== #
     def remove(self):
@@ -129,6 +158,6 @@ class popup_target(object):
             self.frame_color.config(bg=color)
     
     # ====================================================================== #
-    def cancel(self):
+    def on_closing(self):
+        self.bccd.targets.remove(self)
         self.win.destroy()
-

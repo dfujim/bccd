@@ -317,7 +317,7 @@ class PltTracker(object):
             ax.draw_objs = {}
         
         # set up the hover annotations 
-        self._set_hover_annotation(fig,ax)
+        # ~ self._set_hover_annotation(fig,ax)
         
         return fig
 

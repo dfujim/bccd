@@ -42,6 +42,7 @@ class bccd(object):
             mainframe: frame for root
             notebook: notebook for adding files
             tabs: list of fits_tabs objects which have been fetched fits_tabs
+            targets: list of popup_target objects
     """
     
     # image fetch locations
@@ -90,6 +91,7 @@ class bccd(object):
         root.bind('<Control-w>',self.key_ctrl_w)
         root.bind('<Control-o>',self.key_ctrl_o)
         root.bind('<Control-l>',self.key_ctrl_l)
+        root.bind('<Control-t>',self.key_ctrl_t)
         
         # styling
         root.option_add('*tearOff', FALSE)
@@ -200,6 +202,9 @@ class bccd(object):
         
         # intialize tabs list
         self.tabs = []
+        
+        # intialize targets list
+        self.targets = []
 
         # runloop
         self.root.mainloop()
@@ -285,7 +290,13 @@ class bccd(object):
         """
             Add new target to drawn windows
         """
-        popup_target(self)
+        
+        if self.targets:
+            color = 'C%d' % (int(self.targets[-1].color[1])+1)
+        else:
+            color = 'C0'
+            
+        self.targets.append(popup_target(self, color))
         
     # ======================================================================= #
     def close_all(self):
@@ -334,6 +345,14 @@ class bccd(object):
             Open file browser
         """
         self.add_file()
+    
+    # ====================================================================== #
+    def key_ctrl_t(self,*args):
+        """
+            Bound to <Control-Key-t>
+            New target
+        """
+        self.addtarget()
         
     # ====================================================================== #
     def key_ctrl_return(self,*args):

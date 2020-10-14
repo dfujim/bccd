@@ -291,10 +291,25 @@ class bccd(object):
             Add new target to drawn windows
         """
         
+        # get number of possible colors
+        ncolor = len(list(popup_target.colors.keys()))
+        
+        # get next target color
         if self.targets:
-            color = 'C%d' % (int(self.targets[-1].color[1])+1)
+            
+            # get all colors 
+            clrs = [t.color for t in self.targets]
+            
+            # get color indices
+            clrs_i = [int(c[1]) for c in clrs]
+            
+            # find missing in sequence
+            missing = [i for i in range(ncolor) if i not in clrs_i]
+            
+            color = 'C%d' % min(missing)
         else:
             color = 'C0'
+            
             
         self.targets.append(popup_target(self, color))
         

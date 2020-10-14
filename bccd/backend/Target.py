@@ -371,20 +371,7 @@ class Rectangle(Target):
         self.dy = abs(dy)
         
         self.update_popup_label()
-        
-class Ellipis(Target):
-    """
-        Drawing circle target shapes on lots of figures
-        
-        Data fields:
-
-    """
-
-    # ======================================================================= #
-    def __init__(self):
-        
-        self.super().__init__()
-        
+                
 class DraggablePoint:
 
     # http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively

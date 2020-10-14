@@ -7,7 +7,7 @@ from tkinter import ttk
 import textwrap
 
 from bccd.backend import colors
-from bccd.backend.Target import Circle, Square, Rectangle#, Ellipsis
+from bccd.backend.Target import Circle, Square, Rectangle
 
 
 # ========================================================================== #
@@ -42,7 +42,7 @@ class popup_target(object):
                 'C9':'#17becf',
                 }
                 
-    shapes = ('circle','square','ellipsis','rectangle')
+    shapes = ('circle','square','rectangle')
 
     # ====================================================================== #
     def __init__(self, bccd, color='C0'):

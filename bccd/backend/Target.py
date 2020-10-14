@@ -14,24 +14,20 @@ class Target(object):
             ax_list: list of axis
             bccd: bccd object
             color: string, maplotlib color name for coloring everything
-            draw_lines: function handle for drawing the target lines
             figures: list of figures to update
-            patch: mpl.patches object to update
             label: ttk label object to update text on properties
+            popup_target: popup_target object
             
     """
 
     # ======================================================================= #
     def __init__(self, popup_target, color, label):
         
-        self.draw_lines = None
-        self.figures = []
         self.bccd = popup_target.bccd 
         self.popup_target = popup_target 
         self.ax_list = []
         self.color = color
         self.label = label
-        
         self.ax_list.append(self.bccd.plt.gca())
 
 class Circle(Target):
@@ -39,7 +35,10 @@ class Circle(Target):
         Drawing circle target shapes on lots of figures
         
         Data fields:
-
+            pt_center, pt_radius: DraggablePoints
+            circles: mpl.patches for circles
+            x,y: center coordinates
+            r: radius
     """
 
     # ======================================================================= #
@@ -115,16 +114,90 @@ class Circle(Target):
     
 class Square(Target):
     """
-        Drawing circle target shapes on lots of figures
+        Drawing square target shapes on lots of figures
         
         Data fields:
-
+            pt_center, pt_side: DraggablePoints
+            square: mpl.patches for squares
+            x,y: center coordinates
+            side: side length
     """
 
     # ======================================================================= #
-    def __init__(self):
+    def __init__(self, popup_target, color, label, x, y, side):
         
-        self.super().__init__()
+        super().__init__(popup_target, color, label)
+        
+        # save circle position
+        self.x = x
+        self.y = y
+        self.side = side
+        
+        # place circle at the center of the window
+        self.squares = []
+        
+        # center
+        self.pt_center = DraggablePoint(self,self.update_center,
+                            setx=True,sety=True,color=self.color, marker='x')
+        
+        # radius
+        self.pt_side = DraggablePoint(self,self.update_side,
+                            setx=True,sety=False,color=self.color, marker='s')
+        
+        self.update_popup_label()
+        
+    # ======================================================================= #
+    def draw(self, ax):
+        """Add the target to the current axes"""
+        
+        self.squares.append(patches.Rectangle((self.x-self.side,self.y-self.side),
+                                            width=self.side*2,
+                                            height=self.side*2,
+                                            fill=False, 
+                                            facecolor='none',
+                                            lw=1,
+                                            ls='-',
+                                            edgecolor=self.color))
+        ax.add_patch(self.squares[-1])
+        self.pt_center.add_ax(ax, self.x, self.y)
+        self.pt_side.add_ax(ax, self.x+self.side, self.y)
+
+    # ======================================================================= #
+    def update_popup_label(self):
+        """Update popup window label with info on target"""
+        
+        self.label.config(text='x = %d\ny = %d\nside = %d' % (self.x, self.y, self.side*2))
+        
+    # ======================================================================= #
+    def update_center(self, x, y):
+        """
+            Update circle position based on DraggablePoint
+        """
+        self.pt_side.set_xdata(x+self.side)
+        self.pt_side.set_ydata(y)
+        
+        for c in self.squares:
+            c.set_xy((x-self.side,y-self.side))
+        
+        self.x = x
+        self.y = y
+        self.update_popup_label()
+    
+    # ======================================================================= #
+    def update_side(self, x, y):
+        """
+            Update circle radius based on DraggablePoint
+        """
+
+        self.side = abs(self.x-x)
+        dx = self.side*2
+        
+        for c in self.squares:
+            c.set_xy((self.x-self.side,self.y-self.side))
+            c.set_height(dx)
+            c.set_width(dx)
+            
+        self.update_popup_label()
         
 class Rectangle(Target):
     """

@@ -134,6 +134,8 @@ class popup_target(object):
         if self.target is None:
             if self.shape.get() == 'circle':
                 self.target = Circle(self, self.color, self.result_label, 250, 185, 50)  
+            elif self.shape.get() == 'square':
+                self.target = Square(self, self.color, self.result_label, 250, 185, 50)  
             else: 
                 raise RuntimeError("Undefined shape")
         

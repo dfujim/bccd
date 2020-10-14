@@ -201,16 +201,176 @@ class Square(Target):
         
 class Rectangle(Target):
     """
-        Drawing circle target shapes on lots of figures
+        Drawing rectangle target shapes on lots of figures
         
         Data fields:
-
+            pt_tr, pt_tl, pt_br, pt_bl: DraggablePoints
+            rec:    mpl.patches for rec
+            x,y:    center coordinates
+            dx,dy:  side length
     """
 
     # ======================================================================= #
-    def __init__(self):
+    def __init__(self, popup_target, color, label, x, y, side):
         
-        self.super().__init__()
+        super().__init__(popup_target, color, label)
+        
+        # save circle position
+        self.x = x
+        self.y = y
+        self.dx = side
+        self.dy = side
+        
+        # place circle at the center of the window
+        self.rec = []
+        
+        # corner points (tr = top right)
+        self.pt_tl = DraggablePoint(self,self.update_tl,
+                            setx=True,sety=True,color=self.color, marker='s')
+        
+        self.pt_tr = DraggablePoint(self,self.update_tr,
+                            setx=True,sety=True,color=self.color, marker='s')
+
+        self.pt_br = DraggablePoint(self,self.update_br,
+                            setx=True,sety=True,color=self.color, marker='s')
+
+        self.pt_bl = DraggablePoint(self,self.update_bl,
+                            setx=True,sety=True,color=self.color, marker='s')
+        
+        self.update_popup_label()
+        
+    # ======================================================================= #
+    def draw(self, ax):
+        """Add the target to the current axes"""
+        
+        self.rec.append(patches.Rectangle((self.x-self.dx,self.y-self.dy),
+                                            width=self.dx*2,
+                                            height=self.dy*2,
+                                            fill=False, 
+                                            facecolor='none',
+                                            lw=1,
+                                            ls='-',
+                                            edgecolor=self.color))
+        ax.add_patch(self.rec[-1])
+        self.pt_tr.add_ax(ax, self.x+self.dx, self.y+self.dy)
+        self.pt_tl.add_ax(ax, self.x-self.dx, self.y+self.dy)
+        self.pt_br.add_ax(ax, self.x+self.dx, self.y-self.dy)
+        self.pt_bl.add_ax(ax, self.x-self.dx, self.y-self.dy)
+        
+    # ======================================================================= #
+    def update_popup_label(self):
+        """Update popup window label with info on target"""
+        
+        self.label.config(text='x = %d\ny = %d\ndx = %d\ndy = %d' % \
+                (self.x, self.y, self.dx*2, self.dy*2))
+        
+    # ======================================================================= #
+    def update_tr(self, x, y):
+        """
+            Update top right position based on DraggablePoint
+        """
+        self.pt_tl.set_ydata(y)
+        self.pt_br.set_xdata(x)
+        
+        ddx = x - int(self.pt_tl.get_xdata())
+        ddy = y - int(self.pt_br.get_ydata())
+        
+        dx = round(ddx/2)
+        dy = round(ddy/2)
+        
+        for c in self.rec:
+            c.set_xy((x-ddx,y-ddy))
+            c.set_width(ddx)
+            c.set_height(ddy)
+        
+        self.x = x-dx
+        self.y = y-dy
+        
+        self.dx = abs(dx)
+        self.dy = abs(dy)
+        
+        self.update_popup_label()
+    
+    # ======================================================================= #
+    def update_tl(self, x, y):
+        """
+            Update top left position based on DraggablePoint
+        """
+        self.pt_tr.set_ydata(y)
+        self.pt_bl.set_xdata(x)
+        
+        ddx = int(self.pt_tr.get_xdata()) - x
+        ddy = y- int(self.pt_bl.get_ydata())
+        
+        dx = round(ddx/2)
+        dy = round(ddy/2)
+        
+        for c in self.rec:
+            c.set_xy((x,y-ddy))
+            c.set_width(ddx)
+            c.set_height(ddy)
+        
+        self.x = x+dx
+        self.y = y-dy
+        
+        self.dx = abs(dx)
+        self.dy = abs(dy)
+        
+        self.update_popup_label()
+        
+    # ======================================================================= #
+    def update_br(self, x, y):
+        """
+            Update bottom right position based on DraggablePoint
+        """
+        self.pt_bl.set_ydata(y)
+        self.pt_tr.set_xdata(x)
+        
+        ddx = x - int(self.pt_bl.get_xdata())
+        ddy = int(self.pt_tr.get_ydata()) - y
+        
+        dx = round(ddx/2)
+        dy = round(ddy/2)
+        
+        for c in self.rec:
+            c.set_xy((x-ddx,y))
+            c.set_width(ddx)
+            c.set_height(ddy)
+        
+        self.x = x-dx
+        self.y = y+dy
+        
+        self.dx = abs(dx)
+        self.dy = abs(dy)
+        
+        self.update_popup_label()
+        
+    # ======================================================================= #
+    def update_bl(self, x, y):
+        """
+            Update bottom left position based on DraggablePoint
+        """
+        self.pt_br.set_ydata(y)
+        self.pt_tl.set_xdata(x)
+        
+        ddx = int((self.pt_br.get_xdata() - x))
+        ddy = int((self.pt_tl.get_ydata() - y))
+        
+        dx = round(ddx/2)
+        dy = round(ddy/2)
+        
+        for c in self.rec:
+            c.set_xy((x,y))
+            c.set_width(ddx)
+            c.set_height(ddy)
+        
+        self.x = x+dx
+        self.y = y+dy
+        
+        self.dx = abs(dx)
+        self.dy = abs(dy)
+        
+        self.update_popup_label()
         
 class Ellipis(Target):
     """
@@ -334,12 +494,12 @@ class DraggablePoint:
     # ======================================================================= #
     def get_xdata(self):
         """Get x coordinate"""
-        return self.points[0].xdata
+        return self.points[0].get_xdata()
             
     # ======================================================================= #
     def get_ydata(self):
         """Get y coordinate"""
-        return self.points[0].ydata
+        return self.points[0].get_ydata()
             
     # ======================================================================= #
     def set_xdata(self, x):

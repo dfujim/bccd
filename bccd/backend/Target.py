@@ -32,10 +32,25 @@ class Target(object):
         self.points = []
         
     # ======================================================================= #
+    def disable_drag_points(self):
+        """
+            Prevent interaction with the draggable points
+        """
+        # reduce interaction region to zero
+        for dragpt in self.points:
+            for pt in dragpt.points: 
+                try:
+                    pt.set_pickradius(0)
+                    pt.set_markersize(0)
+                except Exception:
+                    pass
+        
+    # ======================================================================= #
     def draw(self, ax):
         """
             Axis operations for drawing
         """
+        
         # check if already drawin in these axes
         if ax in self.ax_list:
             raise RuntimeError("Axis already contains this target") 
@@ -45,6 +60,17 @@ class Target(object):
                 
         # add axes to list
         self.ax_list.append(ax)
+        
+    # ======================================================================= #
+    def enable_drag_points(self):
+        """
+            Enable interaction with the draggable points
+        """
+        # reset interaction region
+        for dragpt in self.points:
+            for pt in dragpt.points: 
+                pt.set_pickradius(DraggablePoint.size)
+                pt.set_markersize(DraggablePoint.size)
         
     # ======================================================================= #
     def remove(self, *args, ax=None):
@@ -438,7 +464,7 @@ class DraggablePoint:
     size=8
 
     # ======================================================================= #
-    def __init__(self,parent,updatefn,setx=True,sety=True,color=None, marker='s'):
+    def __init__(self, parent, updatefn, setx=True, sety=True, color=None, marker='s'):
         """
             parent: parent object
             points: list of point objects, corresponding to the various axes 

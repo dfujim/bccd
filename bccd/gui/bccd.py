@@ -168,8 +168,8 @@ class bccd(object):
         
         # File
         menu_file = Menu(menubar)
-        menu_file.add_command(label='Save State', command=self.save)
-        menu_file.add_command(label='Load State', command=self.load)
+        # ~ menu_file.add_command(label='Save State', command=self.save)
+        # ~ menu_file.add_command(label='Load State', command=self.load)
         menu_file.add_command(label='Close All Figures', command=self.close_all)
         menu_file.add_command(label='Exit', command=sys.exit)
         menubar.add_cascade(menu=menu_file, label='File')

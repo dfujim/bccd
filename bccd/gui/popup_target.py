@@ -19,6 +19,8 @@ class popup_target(object):
             ax_list: list of axes on which the current target is drawn
             color: string. matplotlib color 
             frame_color: tk frame for showing the color of the target lines
+            interactive: BooleanVar, if true, target can be interacted with, 
+                         using draggablepoints
             radios: list of radio buttons
             result_label: ttk.label object for showing target info
             shape: StringVar, stores shape to draw
@@ -66,6 +68,16 @@ class popup_target(object):
     
         win.protocol("WM_DELETE_WINDOW", self.on_closing)
     
+        # Menu 
+        win.option_add('*tearOff', FALSE)
+        menubar = Menu(win)
+        win['menu'] = menubar
+        self.interactive = BooleanVar()
+        self.interactive.set(True)
+        menubar.add_checkbutton(label="Interactive", variable=self.interactive,
+                                selectcolor=colors.selected, 
+                                command=self.hide_handles)
+        
         # Column0 ----------------------------------------------------------
         frame_col0 = ttk.Frame(win, relief='sunken', pad=5)
         frame_col0.grid(column=0, row=0, sticky=(N,S,E,W), padx=5, pady=5)
@@ -143,6 +155,24 @@ class popup_target(object):
         
         self.target.draw(self.bccd.plt.gca())
     
+        # set interactivity
+        if not self.interactive.get():
+            self.target.disable_drag_points()
+            
+    # ====================================================================== #
+    def hide_handles(self):
+        """
+            Hide the interactive handles
+        """
+        
+        try:
+            if self.interactive.get():
+                self.target.enable_drag_points()
+            else:
+                self.target.disable_drag_points()
+        except AttributeError:
+            self.interactive.set(not self.interactive.get())
+        
     # ====================================================================== #
     def remove(self):
         """

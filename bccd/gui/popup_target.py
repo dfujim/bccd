@@ -148,7 +148,7 @@ class popup_target(object):
         """
             Remove the target from the open figure
         """
-        pass
+        self.target.remove(ax=self.bccd.plt.gca())
         
     # ====================================================================== #
     def set_frame_color(self, color='#FFFFFF'):
@@ -163,5 +163,6 @@ class popup_target(object):
     
     # ====================================================================== #
     def on_closing(self):
+        self.target.remove_all()
         self.bccd.targets.remove(self)
         self.win.destroy()

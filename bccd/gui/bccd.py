@@ -310,7 +310,6 @@ class bccd(object):
         else:
             color = 'C0'
             
-            
         self.targets.append(popup_target(self, color))
         
     # ======================================================================= #

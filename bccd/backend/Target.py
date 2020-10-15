@@ -36,19 +36,9 @@ class Target(object):
         """
             Axis operations for drawing
         """
-        
         # check if already drawin in these axes
         if ax in self.ax_list:
             raise RuntimeError("Axis already contains this target") 
-        
-        # check that all axes objects are in current figures
-        # ~ del_list = []
-        # ~ for axi in self.ax_list:
-            # ~ if axi.get_figure().number == ax.get_figure().number:
-                # ~ del_list.append(axi)
-                
-        # ~ for axi in del_list:
-            # ~ self.ax_list.remove(axi)
                 
         # connect with window close
         ax.figure.canvas.mpl_connect('close_event', partial(self.remove,ax=ax))
@@ -82,10 +72,8 @@ class Target(object):
         """
             Remove the DraggablePoints and patch from all axes
         """
-        
         for ax in self.ax_list.copy():
             self.remove(ax=ax)
-        
             
 class Circle(Target):
     """

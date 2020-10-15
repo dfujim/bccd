@@ -13,13 +13,12 @@ mpl.use('TkAgg')
 import sys, os, datetime, textwrap, glob
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import weakref as wref
 import webbrowser
 import subprocess
 import logging
 
-from bccd import __version__, logger_name, icon_path
+from bccd import __version__, icon_path
 from bccd.backend.PltTracker import PltTracker
 from bccd.gui.fits_tab import fits_tab
 from bccd.gui.popup_target import popup_target
@@ -141,7 +140,7 @@ class bccd(object):
         ttk_style.map('TSpinbox', borderwidth=[('selected', 1)])
         
         # icon
-        # ~ self.set_icon(root)
+        self.set_icon(root)
         
         # event bindings
         root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -426,3 +425,13 @@ class bccd(object):
             Save all internal variables for later loading
         """
         pass
+    
+    # ======================================================================= #
+    def set_icon(self,window):
+        """Set the icon for new windows"""
+        try:
+            img = PhotoImage(file=icon_path)
+            window.tk.call('wm', 'iconphoto', window._w, img)
+        except Exception as err:
+            print(err)
+        

@@ -58,7 +58,7 @@ class popup_target(object):
         self.target = None
         
         # icon
-        # ~ parent.set_icon(self.win)
+        bccd.set_icon(win)
         
         # Key bindings
         win.bind('<Return>',self.draw)             
@@ -163,6 +163,10 @@ class popup_target(object):
     
     # ====================================================================== #
     def on_closing(self):
-        self.target.remove_all()
+        try:
+            self.target.remove_all()
+        except AttributeError:
+            pass
+            
         self.bccd.targets.remove(self)
         self.win.destroy()

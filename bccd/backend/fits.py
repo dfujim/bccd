@@ -521,7 +521,7 @@ class fits(object):
         amp = np.sqrt(a*c-b**2)/np.pi
         
         # make PDF
-        gaus = lambda x,y: self.gaussian2D(x,y,x0,y0,sx,sy,amp,theta)
+        gaus = lambda x,y: gaussian2D(x,y,x0,y0,sx,sy,amp,theta)
         
         # integrate: fraction of beam overlap
         overlap =  dblquad(gaus,ylo,yhi,xlo,xhi)[0]

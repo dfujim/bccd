@@ -4,6 +4,7 @@
 
 import matplotlib.patches as patches
 from functools import partial
+import numpy as np
 
 class Target(object):
     
@@ -455,6 +456,177 @@ class Rectangle(Target):
         
         self.update_popup_label()
                 
+class Ellipse(Target):
+    """
+        Drawing ellipse target shapes on lots of figures
+        
+        Data fields:
+            pt_center, pt_radius1, pt_radius2: DraggablePoints
+            patches: mpl.patches for patches
+            x,y: center coordinates
+            r1, r2: radius
+    """
+    
+    # minimum radius able to set
+    rmin = 10
+
+    # ======================================================================= #
+    def __init__(self, popup_target, color, label, x, y, r1, r2):
+        
+        super().__init__(popup_target, color, label)
+        
+        # save circle position
+        self.x = x
+        self.y = y
+        self.r1 = r1
+        self.r2 = r2
+        self.angle = 0
+        
+        # place circle at the center of the window
+        self.patches = []
+        
+        # center
+        self.pt_center = DraggablePoint(self,self.update_center,
+                            setx=True,sety=True,color=self.color, marker='x')
+        
+        # radius
+        self.pt_radius1 = DraggablePoint(self,self.update_radius1,
+                            setx=True,sety=True,color=self.color, marker='o')
+        
+        self.pt_radius2 = DraggablePoint(self,self.update_radius2,
+                            setx=True,sety=True,color=self.color, marker='o')
+        
+        self.points = [self.pt_center, self.pt_radius1, self.pt_radius2]
+        self.update_popup_label()
+        
+    # ======================================================================= #
+    def draw(self, ax):
+        """Add the target to the current axes"""
+        
+        super().draw(ax)
+        
+        # draw things
+        self.patches.append(patches.Ellipse((self.x,self.y),self.r1*2, self.r2*2,
+                                     fill=False, 
+                                     facecolor='none',
+                                     lw=1,
+                                     ls='-',
+                                     edgecolor=self.color))
+        ax.add_patch(self.patches[-1])
+        self.pt_center.add_ax(ax, self.x, self.y)
+        self.pt_radius1.add_ax(ax, self.x+self.r1, self.y)
+        self.pt_radius2.add_ax(ax, self.x, self.y+self.r2)
+
+    # ======================================================================= #
+    def update_popup_label(self):
+        """Update popup window label with info on target"""
+        
+        self.label.config(text='x0 = %.3f\ny0 = %.3f\nr1 = %.3f\nr2 = %.3f\nangle = %.3f [rad]' % \
+                        (self.x, self.y, self.r1, self.r2, self.angle))
+        
+    # ======================================================================= #
+    def update_center(self, x, y):
+        """
+            Update circle position based on DraggablePoint
+        """
+        self.pt_radius1.set_xdata(x+self.r1*np.cos(self.angle))
+        self.pt_radius1.set_ydata(y+self.r1*np.sin(self.angle))
+        self.pt_radius2.set_xdata(x+self.r2*np.cos(self.angle+np.pi/2))
+        self.pt_radius2.set_ydata(y+self.r2*np.sin(self.angle+np.pi/2))
+        
+        for c in self.patches:
+            c.set_center((x,y))
+        
+        self.x = x
+        self.y = y
+        self.update_popup_label()
+    
+    # ======================================================================= #
+    def update_radius1(self, x, y):
+        """
+            Update circle radius based on DraggablePoint
+        """
+        
+        # calculate the xy distance
+        dx = x-self.x
+        dy = y-self.y
+
+        # get the radius 
+        self.r1 = np.sqrt(dx**2+dy**2)
+        
+        # prevent too small of a radius
+        if self.r1 < self.rmin:
+            self.r1 = self.rmin
+            self.pt_radius1.set_xdata(self.x+self.r1*np.cos(self.angle))
+            self.pt_radius1.set_ydata(self.y+self.r1*np.sin(self.angle))
+        
+        # get the angle 
+        try:
+            a = np.arctan(dy/dx)
+        except RuntimeWarning:
+            pass
+        else:
+            self.angle = a
+            
+        # big angles
+        if dx < 0:
+            self.angle += np.pi
+        
+        # set patch
+        for c in self.patches:
+            c.set_width(self.r1*2)
+            c.set_angle(self.angle*180/np.pi)
+            
+        # set r2
+        self.pt_radius2.set_xdata(self.x+self.r2*np.cos(self.angle+np.pi/2))
+        self.pt_radius2.set_ydata(self.y+self.r2*np.sin(self.angle+np.pi/2))
+            
+        self.update_popup_label()
+    
+    # ======================================================================= #
+    def update_radius2(self, x, y):
+        """
+            Update circle radius based on DraggablePoint
+        """
+
+        # calculate the xy distance
+        dx = x-self.x
+        dy = y-self.y
+
+        # get the radius 
+        self.r2 = np.sqrt(dx**2+dy**2)
+        
+        # prevent too small of a radius
+        if self.r2 < self.rmin:
+            self.r2 = self.rmin
+            self.pt_radius2.set_xdata(self.x+self.r2*np.cos(self.angle+np.pi/2))
+            self.pt_radius2.set_ydata(self.y+self.r2*np.sin(self.angle+np.pi/2))
+        
+        # get the angle 
+        try:
+            a = np.arctan(dy/dx)+np.pi/2
+        except RuntimeWarning:
+            pass
+        else:
+            self.angle = a
+        
+         # big angles
+        if dx > 0:
+            self.angle -= np.pi
+            
+        # set patch
+        for c in self.patches:
+            c.set_height(self.r2*2)
+            c.set_angle(self.angle*180/np.pi)
+            
+        # set r1
+        self.pt_radius1.set_xdata(self.x+self.r1*np.cos(self.angle))
+        self.pt_radius1.set_ydata(self.y+self.r1*np.sin(self.angle))
+            
+        self.update_popup_label()
+    
+
+
 class DraggablePoint:
 
     # http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively

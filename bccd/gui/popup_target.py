@@ -7,7 +7,7 @@ from tkinter import ttk
 import textwrap
 
 from bccd.backend import colors
-from bccd.backend.Target import Circle, Square, Rectangle
+from bccd.backend.Target import Circle, Square, Rectangle, Ellipse
 
 
 # ========================================================================== #
@@ -44,7 +44,7 @@ class popup_target(object):
                 'C9':'#17becf',
                 }
                 
-    shapes = ('circle','square','rectangle')
+    shapes = ('circle','square','rectangle','ellipse')
 
     # ====================================================================== #
     def __init__(self, bccd, color='C0'):
@@ -149,7 +149,9 @@ class popup_target(object):
             elif self.shape.get() == 'square':
                 self.target = Square(self, self.color, self.result_label, 250, 185, 50)  
             elif self.shape.get() == 'rectangle':
-                self.target = Rectangle(self, self.color, self.result_label, 250, 185, 50)  
+                self.target = Rectangle(self, self.color, self.result_label, 250, 185, 50) 
+            elif self.shape.get() == 'ellipse':
+                self.target = Ellipse(self, self.color, self.result_label, 250, 185, 50, 50) 
             else: 
                 raise RuntimeError("Undefined shape")
         

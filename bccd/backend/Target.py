@@ -506,7 +506,10 @@ class Ellipse(Target):
         super().draw(ax)
         
         # draw things
-        self.patches.append(patches.Ellipse((self.x,self.y),self.r1*2, self.r2*2,
+        self.patches.append(patches.Ellipse((self.x,self.y),
+                                     width=self.r1*2, 
+                                     height=self.r2*2,
+                                     angle=self.angle*180/np.pi,
                                      fill=False, 
                                      facecolor='none',
                                      lw=1,
@@ -514,8 +517,10 @@ class Ellipse(Target):
                                      edgecolor=self.color))
         ax.add_patch(self.patches[-1])
         self.pt_center.add_ax(ax, self.x, self.y)
-        self.pt_radius1.add_ax(ax, self.x+self.r1, self.y)
-        self.pt_radius2.add_ax(ax, self.x, self.y+self.r2)
+        self.pt_radius1.add_ax(ax,  self.x+self.r1*np.cos(self.angle), 
+                                    self.y+self.r1*np.sin(self.angle))
+        self.pt_radius2.add_ax(ax,  self.x+self.r2*np.cos(self.angle+np.pi/2), 
+                                    self.y+self.r2*np.sin(self.angle+np.pi/2))
 
     # ======================================================================= #
     def update_popup_label(self):
@@ -621,10 +626,8 @@ class Ellipse(Target):
             
         # set r1
         self.pt_radius1.set_xdata(self.x+self.r1*np.cos(self.angle))
-        self.pt_radius1.set_ydata(self.y+self.r1*np.sin(self.angle))
-            
+        self.pt_radius1.set_ydata(self.y+self.r1*np.sin(self.angle))            
         self.update_popup_label()
-    
 
 
 class DraggablePoint:

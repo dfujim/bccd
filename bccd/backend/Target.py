@@ -157,7 +157,7 @@ class Circle(Target):
     def update_popup_label(self):
         """Update popup window label with info on target"""
         
-        self.label.config(text='x = %d\ny = %d\nr = %d' % (self.x, self.y, self.r))
+        self.label.config(text='x0 = %.3f\ny0 = %.3f\nr = %.3f' % (self.x, self.y, self.r))
         
     # ======================================================================= #
     def update_center(self, x, y):
@@ -245,7 +245,7 @@ class Square(Target):
     def update_popup_label(self):
         """Update popup window label with info on target"""
         
-        self.label.config(text='x = %d\ny = %d\nside = %d' % (self.x, self.y, self.side*2))
+        self.label.config(text='x0 = %.3f\ny0 = %.3f\nside = %.3f' % (self.x, self.y, self.side*2))
         
     # ======================================================================= #
     def update_center(self, x, y):
@@ -344,7 +344,7 @@ class Rectangle(Target):
     def update_popup_label(self):
         """Update popup window label with info on target"""
         
-        self.label.config(text='x = %d\ny = %d\ndx = %d\ndy = %d' % \
+        self.label.config(text='x0 = %.3f\ny0 = %.3f\ndx = %.3f\ndy = %.3f' % \
                 (self.x, self.y, self.dx*2, self.dy*2))
         
     # ======================================================================= #

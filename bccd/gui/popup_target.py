@@ -111,7 +111,6 @@ class popup_target(object):
                             value=v)
             rad.grid(column=0, row=i, sticky=(N,W))
             self.radios.append(rad)
-            frame_col1.rowconfigure(i,weight=1)
             
         self.shape.set(self.shapes[0])
         

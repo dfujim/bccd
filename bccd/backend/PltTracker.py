@@ -4,6 +4,8 @@
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import yaml
+import os
 
 # =========================================================================== #
 class PltTracker(object):
@@ -69,7 +71,7 @@ class PltTracker(object):
         
         # track the drawn object
         if id is not None:
-            ax.draw_objs.setdefault(id,[]).append(output) 
+            ax.draw_objs.setdefault(id,[]).append((output,kwargs)) 
         
         return output
     
@@ -85,6 +87,9 @@ class PltTracker(object):
 
             # get item
             for item in ax.draw_objs[draw_id]:
+            
+                # strip saveas dict
+                item = item[0]
             
                 # remove line
                 try:
@@ -147,7 +152,7 @@ class PltTracker(object):
         ax.draw_objs = {}
         
     # ======================================================================= # 
-    def contour(self, id, X, Y, Z, levels=5, unique=True, **kwargs):
+    def contour(self, id, X, Y, Z, levels=5, unique=True, info=None, **kwargs):
         
         # get active for this style
         active_style = self.active
@@ -165,8 +170,17 @@ class PltTracker(object):
         
         obj = ax.contour(X, Y, Z, levels, **kwargs)
         
+        # check input
+        if info is None: info = {}
+        
+        saveas = {'id'              :id,
+                  'levels'          :levels,
+                  **info,
+                  **kwargs
+                  }
+        
         # save the drawn object to the file
-        ax.draw_objs.setdefault(id,[]).append(obj)
+        ax.draw_objs.setdefault(id,[]).append((obj,saveas))
         
         return obj
         
@@ -217,8 +231,24 @@ class PltTracker(object):
         if annot_label is not None: 
             ax.lines[-1].annot_label = annot_label
             
+        saveas = {'id'          :id,
+                  'fmt'         :fmt,
+                  'color'       :color,
+                  'ecolor'      :ecolor,
+                  'elinewidth'  :elinewidth, 
+                  'capsize'     :capsize, 
+                  'barsabove'   :barsabove, 
+                  'lolims'      :lolims, 
+                  'uplims'      :uplims, 
+                  'xlolims'     :xlolims,
+                  'xuplims'     :xuplims,
+                  'errorevery'  :errorevery, 
+                  'capthick'    :capthick,
+                  **kwargs,
+                  }
+            
         # save the drawn object to the file
-        ax.draw_objs.setdefault(id,[]).append(obj)
+        ax.draw_objs.setdefault(id,[]).append((obj,saveas))
         
         return obj
     
@@ -249,6 +279,10 @@ class PltTracker(object):
         if not hasattr(ax,'draw_objs'):
             ax.draw_objs = {}
         
+        # setup saveas
+        fig.saveas = fig.savefig
+        fig.savefig = self.savefig_new
+        
         return fig
 
     # ======================================================================= #
@@ -265,7 +299,12 @@ class PltTracker(object):
     def imshow(self, id, X, cmap=None, norm=None, aspect=None, interpolation=None, 
                 alpha=None, vmin=None, vmax=None, origin=None, extent=None, 
                 filternorm=1, filterrad=4.0, resample=None, url=None, data=None,
-                unique=True, **kwargs):
+                unique=True, info=None, **kwargs):
+        """
+            unique: force only one of this id in the figure
+            info: dict of other info to pass to plttracker, save for writing later
+        """
+        
         
         # get active for this style
         active_style = self.active
@@ -279,7 +318,6 @@ class PltTracker(object):
         
         # redraw old objects and lines
         if unique:  self._remove_drawn_object(ax,id)
-        self._remove_drawn_object(ax,id)
         
         # set up labelling of line objects for mouseover
         if 'label' in kwargs:
@@ -293,16 +331,30 @@ class PltTracker(object):
                 origin=origin, extent=extent, filternorm=filternorm, 
                 filterrad=filterrad, resample=resample, url=url, data=data,
                 **kwargs)
-
-        # label the line object
-        # ~ ax.lines[-1].set_label(label)
-        
-        # set the annotation
-        # ~ if annot_label is not None: 
-            # ~ ax.lines[-1].annot_label = annot_label
+            
+        # check input
+        if info is None: info = {}
             
         # save the drawn object to the file
-        ax.draw_objs.setdefault(id,[]).append(obj)
+        saveas = {'id'              :id,
+                  'cmap'            :cmap,
+                  'norm'            :norm,
+                  'aspect'          :aspect,
+                  'interpolation'   :interpolation,
+                  'alpha'           :alpha,
+                  'vmin'            :vmin,
+                  'vmax'            :vmax,
+                  'origin'          :origin,
+                  'extent'          :extent,
+                  'filternorm'      :filternorm,
+                  'filterrad'       :filterrad,
+                  'resample'        :resample,
+                  'url'             :url,
+                  **info,
+                  **kwargs
+                  }
+        
+        ax.draw_objs.setdefault(id,[]).append((obj,saveas))
         
         return obj
         
@@ -338,6 +390,27 @@ class PltTracker(object):
         
         return obj
 
+    # ======================================================================= #
+    def savefig_new(self,filename):            
+        """Save figure, alongside yaml file with figure details"""
+        fig = self.gcf()
+        
+        # get paramters for drawn objs
+        draw_objs = self.gca().draw_objs.values()
+        objs = {}
+        for drawo in draw_objs:
+            
+            for i,draw in enumerate(drawo):
+                objs[draw[1]['id']+' (%d)'%i] = draw[1]
+        
+        # write text file with details
+        yaml_file = os.path.splitext(filename)[0]+'.yaml'
+        with open(yaml_file,'w') as fid:    
+            fid.write(yaml.dump(objs))
+        
+        # write figure
+        fig.saveas(filename)
+        
     # ======================================================================= #
     def text(self,*args,id=None,unique=True,**kwargs):
         return self._decorator(plt.text,*args,id=id,unique=unique,**kwargs)

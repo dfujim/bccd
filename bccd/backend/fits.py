@@ -202,7 +202,9 @@ class fits(object):
         if imap: cmap+='_r'
         
         # draw
-        self.plt.imshow(id=self.filename,X=data,alpha=alpha,cmap=cmap,**self.show_options)
+        self.plt.imshow(id=self.filename,X=data,alpha=alpha,cmap=cmap,
+                        info={'style':'greyscale', 'black':self.black},
+                        **self.show_options)
     
     # ======================================================================= #    
     def draw_2Dfit(self,fn,*pars,levels=10,cmap='jet'):
@@ -251,7 +253,9 @@ class fits(object):
         ax = self.plt.gca()
         
         options = {k:val for k,val in self.show_options.items() if k != "interpolation"}
-        self.plt.contour(self.filename,X,Y,data,levels=nlevels,cmap=cmap,**options)
+        self.plt.contour(self.filename,X,Y,data,levels=nlevels,cmap=cmap,
+                         info={'style':'contour', 'black':self.black},
+                         **options)
     
     # ======================================================================= #
     def draw_edges(self,sigma=1,alpha=1,cmap='Greys',imap=True):
@@ -277,7 +281,9 @@ class fits(object):
         
         # draw
         edges = np.ma.masked_where(~edges,edges.astype(int))
-        self.plt.imshow(self.filename, edges, alpha=alpha, cmap=cmap, **self.show_options)
+        self.plt.imshow(self.filename, edges, alpha=alpha, cmap=cmap, 
+                        info={'style':'edges', 'black':self.black},
+                        **self.show_options)
         
     # ======================================================================= #
     def draw_sobel(self,alpha=1,cmap='Greys',imap=False):
@@ -300,6 +306,7 @@ class fits(object):
                         sbl,
                         alpha=alpha,
                         cmap=cmap,
+                        info={'style':'sobel', 'black':self.black},
                         **self.show_options)
     
         return sbl

@@ -513,12 +513,14 @@ class fits(object):
         # get fitting results 
         x0,y0,sx,sy,amp,theta = self.result_gaussian2D['result']
         
-        # get normalized amplitude
+        # get normalized volume
         # https://en.wikipedia.org/wiki/Gaussian_function
-        a = 0.5*(np.cos(theta)/sx)**2 + 0.5*(np.sin(theta)/sy)**2
-        b = 0.25*-(np.sin(theta)/sx)**2 + 0.25*(np.sin(theta)/sy)**2
-        c = 0.5*(np.sin(theta)/sx)**2 + 0.5*(np.cos(theta)/sy)**2
-        amp = np.sqrt(a*c-b**2)/np.pi
+        # ~ a = 0.5*(np.cos(theta)/sx)**2 + 0.5*(np.sin(theta)/sy)**2
+        # ~ b = 0.25*-(np.sin(theta)/sx)**2 + 0.25*(np.sin(theta)/sy)**2
+        # ~ c = 0.5*(np.sin(theta)/sx)**2 + 0.5*(np.cos(theta)/sy)**2
+        # ~ amp = np.sqrt(a*c-b**2)/np.pi
+        
+        amp = 1/(2*np.pi*sx*sy)
         
         # make PDF
         gaus = lambda x,y: gaussian2D(x,y,x0,y0,sx,sy,amp,theta)

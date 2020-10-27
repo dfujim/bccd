@@ -628,8 +628,7 @@ class Ellipse(Target):
         self.pt_radius1.set_xdata(self.x+self.r1*np.cos(self.angle))
         self.pt_radius1.set_ydata(self.y+self.r1*np.sin(self.angle))            
         self.update_popup_label()
-
-
+        
 class DraggablePoint:
 
     # http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively

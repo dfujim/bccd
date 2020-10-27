@@ -401,6 +401,10 @@ class PltTracker(object):
         for drawo in draw_objs:
             
             for i,draw in enumerate(drawo):
+                
+                if '.bccd/' in draw[1]['id']:
+                    draw[1]['id'] = draw[1]['id'].split('.bccd/')[1]
+                
                 objs[draw[1]['id']+' (%d)'%i] = draw[1]
         
         # write text file with details

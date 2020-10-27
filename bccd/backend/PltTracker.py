@@ -119,80 +119,13 @@ class PltTracker(object):
             # clear labels
             del ax.draw_objs[draw_id]
         
-    # ======================================================================= #
-    def _set_hover_annotation(self,fig,ax):
-        """
-            Setup the annotate object for mouse hover drawing
-        """
-        if not hasattr(ax,'hover_annot'):
-            ax.hover_annot = ax.annotate('',
-                             xy=(0,0),
-                             xytext=(-3, 20),
-                             textcoords='offset points', 
-                             ha='right', 
-                             va='bottom',
-                             bbox=dict(boxstyle='round,pad=0.1',
-                                       fc='white', 
-                                       alpha=0.1),
-                             arrowprops=dict(arrowstyle = '->', 
-                                             connectionstyle='arc3,rad=0'),
-                             fontsize='xx-small',
-                            )    
-        ax.hover_annot.set_visible(False)
-        
-        fig.canvas.mpl_connect("motion_notify_event", \
-                               lambda x: self._show_annot_on_hover(x,fig,ax))
-        
-    # ======================================================================= #
-    def _show_annot_on_hover(self,event,fig,ax):
-        """
-            If the cursor is near enough to the line, show the annotation. 
-            
-            Citation: https://stackoverflow.com/a/47166787
-        """
-        vis = ax.hover_annot.get_visible()
-        if event.inaxes == ax:
-            for line in ax.lines:        
-                cont, ind = line.contains(event)
-                if cont:
-                    self._update_hover_annot(ind,line,ax)
-                    fig.canvas.draw_idle()
-                    break
-                else:
-                    if vis:
-                        ax.hover_annot.set_visible(False)
-                        fig.canvas.draw_idle()
-        
-    # ======================================================================= #
+   # ======================================================================= #
     def _update_active_id(self,event):
         """
             Update the active figure id based on click event.
         """
         number = event.canvas.figure.number
         self.active = number
-    
-    # ======================================================================= #
-    def _update_hover_annot(self,ind,line,ax):
-        """
-            Update the hover annotation with that object's label.
-            
-            Citation: https://stackoverflow.com/a/47166787
-        """
-    
-        i = ind["ind"][0]
-        x,y = line.get_data()
-        annot = ax.hover_annot
-        annot.xy = (x[i], y[i])
-        
-        if hasattr(line,'annot_label'):
-            text = line.annot_label[i]
-        else:
-            text = line.get_label()
-            
-        annot.set_text(text)
-        annot.set_backgroundcolor(line.get_color())
-        annot.get_bbox_patch().set_alpha(0.4)
-        annot.set_visible(True)
     
     # ======================================================================= #
     def annotate(self,id,*args,unique=True,**kwargs):
@@ -315,9 +248,6 @@ class PltTracker(object):
         ax = plt.gca()
         if not hasattr(ax,'draw_objs'):
             ax.draw_objs = {}
-        
-        # set up the hover annotations 
-        # ~ self._set_hover_annotation(fig,ax)
         
         return fig
 

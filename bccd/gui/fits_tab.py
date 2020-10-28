@@ -12,9 +12,6 @@ import pandas as pd
 from bccd.backend.fits import fits
 import bccd.backend.colors as colors
 from bccd.backend.PltTracker import PltTracker as plt
-
-from datetime import datetime
-from dateutil import tz
 from functools import partial
 
 # =========================================================================== # 
@@ -154,16 +151,8 @@ class fits_tab(object):
                   text='Exposure: %.3f s'%img.header['EXPOSURE']).grid(column=0,row=r,sticky=W); r+=1
         
         # show date and time, converted from utc to local
-        date = img.header['DATE-OBS']
-        from_zone = tz.tzutc()
-        to_zone = tz.gettz('Canada/Vancover')
-        
-        utc = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S')
-        utc = utc.replace(tzinfo=from_zone)
-        local = utc.astimezone(to_zone)
-        
-        date = local.strftime("%Y-%m-%d")
-        time = local.strftime("%H:%M:%S")
+        date = img.datetime.strftime("%Y-%m-%d")
+        time = img.datetime.strftime("%H:%M:%S")
         
         ttk.Label(frame_column0,text=date).grid(column=0,row=r,sticky=W); r+=1
         ttk.Label(frame_column0,text=time).grid(column=0,row=r,sticky=W); r+=1

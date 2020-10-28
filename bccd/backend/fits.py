@@ -22,6 +22,9 @@ from skimage.transform import hough_circle,hough_circle_peaks
 from skimage.transform import probabilistic_hough_line
 from skimage.transform import rescale
 
+from datetime import datetime
+from dateutil import tz
+
 plt_global = PltTracker()
 
 # =========================================================================== #
@@ -32,6 +35,8 @@ class fits(object):
             black:          float, pixel value corresponding to black (zero)
             data:           2D numpy array, pixel values
             data_original:  numpy array, pixel values
+            datetime:       datetime object with the time the image was taken, 
+                            in the local time zone
             filename:       name of the file
             header:         dict, header information
             
@@ -203,7 +208,11 @@ class fits(object):
         
         # draw
         self.plt.imshow(id=self.filename,X=data,alpha=alpha,cmap=cmap,
-                        info={'style':'greyscale', 'black':self.black},
+                        info={  'style':'greyscale', 
+                                'black':self.black, 
+                                'exposure_s':self.header['EXPOSURE'],
+                                'date':self.datetime
+                            },
                         **self.show_options)
     
     # ======================================================================= #    
@@ -254,7 +263,11 @@ class fits(object):
         
         options = {k:val for k,val in self.show_options.items() if k != "interpolation"}
         self.plt.contour(self.filename,X,Y,data,levels=nlevels,cmap=cmap,
-                         info={'style':'contour', 'black':self.black},
+                         info={ 'style':'contour', 
+                                'black':self.black,
+                                'exposure_s':self.header['EXPOSURE'],
+                                'date':self.datetime
+                            },
                          **options)
     
     # ======================================================================= #
@@ -282,7 +295,11 @@ class fits(object):
         # draw
         edges = np.ma.masked_where(~edges,edges.astype(int))
         self.plt.imshow(self.filename, edges, alpha=alpha, cmap=cmap, 
-                        info={'style':'edges', 'black':self.black},
+                        info={  'style':'edges', 
+                                'black':self.black,
+                                'exposure_s':self.header['EXPOSURE'],
+                                'date':self.datetime
+                            },
                         **self.show_options)
         
     # ======================================================================= #
@@ -306,7 +323,11 @@ class fits(object):
                         sbl,
                         alpha=alpha,
                         cmap=cmap,
-                        info={'style':'sobel', 'black':self.black},
+                        info={  'style':'sobel', 
+                                'black':self.black,
+                                'exposure_s':self.header['EXPOSURE'],
+                                'date':self.datetime
+                            },
                         **self.show_options)
     
         return sbl
@@ -572,6 +593,12 @@ class fits(object):
             data = rescale(data,resc,order=3,multichannel=False,preserve_range=True) 
         
         self.data = data
+        
+        # get the time and date
+        date = self.header['DATE-OBS']
+        utc = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S')
+        utc = utc.replace(tzinfo=tz.tzutc())
+        self.datetime = utc.astimezone(tz=None)
         
     # ======================================================================= #
     def set_black(self,black):

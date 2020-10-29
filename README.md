@@ -1,8 +1,18 @@
-# Draw and process BNMR CCD image files
+# Draw and process B-NMR CCD image files
 
-Object for reading and processing fits files taken by the BNMR or BNQR CCD camera.
+## Installation and Running the GUI
 
-## `bccd.fits`
+* Install with `pip3 install --user bccd` from [pypi](https://pypi.org/project/bccd/). 
+* Run with `python3 -m bccd`. You may want to create an alias for this command. 
+
+Note that `bccd` uses `rsync` to copy all files from the machines which operate the cameras. These machines are password protected and the passwords must be entered on every use, unless you give your public key to these devices. To do that, do:
+
+* Create a public key if you don't have one already: `ssh-keygen -t rsa`. On prompt enter no password. 
+* Copy the key to the server using the proper username and password: `ssh-copy-id user@machine.domain`
+
+On first usage, `bccd` will need to transfer all the files from these machines. This may take some time, please be patient. On subsequent usages, `bccd` will only update its list of files so the process will be much faster. These files are stored in `$HOME/.bccd`.
+
+## `bccd.fits` Reference
 
 Constructor: 
 

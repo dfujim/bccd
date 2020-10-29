@@ -163,13 +163,13 @@ class fits_tab(object):
         frame_column1.grid(column=1,row=0,rowspan=10,sticky=(N,W),padx=5,pady=5)
         
         label_style = ttk.Label(frame_column1, text='Draw Style: ')
-        combo_style = ttk.Combobox(frame_column1, textvariable=self.style, 
+        self.combo_style = ttk.Combobox(frame_column1, textvariable=self.style, 
                                    state='readonly', width=20)
-        combo_style['values'] = tuple(self.styles.keys())
+        self.combo_style['values'] = tuple(self.styles.keys())
         
         r = 0
         label_style.grid(column=0,row=r,sticky=W)
-        combo_style.grid(column=1,row=r,sticky=W); r+=1
+        self.combo_style.grid(column=1,row=r,sticky=W); r+=1
         
         # black level
         label_black = ttk.Label(frame_column1,text='Black Value: ')
@@ -184,7 +184,7 @@ class fits_tab(object):
         button_black.grid(column=1,row=0,sticky=W, padx=2)
         
         # Inputs for draw style
-        combo_style.bind("<<ComboboxSelected>>", 
+        self.combo_style.bind("<<ComboboxSelected>>", 
                          partial(self.change_draw_fn, frame=frame_column1, row=r))
         r = self.input_place(frame_column1,r)+1
         

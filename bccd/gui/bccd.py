@@ -3,20 +3,18 @@
 # Sep 2020
 
 from tkinter import *
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog
 
 # set MPL backend
 import matplotlib as mpl
 mpl.use('TkAgg')
 
-
-import sys, os, datetime, textwrap, glob
+import sys, os, datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import weakref as wref
-import webbrowser
 import subprocess
-import logging
+import yaml
 
 from bccd import __version__, icon_path
 from bccd.backend.PltTracker import PltTracker
@@ -168,8 +166,7 @@ class bccd(object):
         
         # File
         menu_file = Menu(menubar)
-        # ~ menu_file.add_command(label='Save State', command=self.save)
-        # ~ menu_file.add_command(label='Load State', command=self.load)
+        menu_file.add_command(label='Load From Yaml', command=self.load)
         menu_file.add_command(label='Close All Figures', command=self.close_all)
         menu_file.add_command(label='Exit', command=sys.exit)
         menubar.add_cascade(menu=menu_file, label='File')
@@ -415,17 +412,58 @@ class bccd(object):
     # ====================================================================== #
     def load(self):
         """
-            Load all internal variables from save file
+            Load images from a bccd yaml file
         """
-        pass
         
-    # ====================================================================== #
-    def save(self):
-        """
-            Save all internal variables for later loading
-        """
-        pass
-    
+        # get the filename
+        filename = filedialog.askopenfilename(initialdir=os.environ['PWD'],
+                                    title='Select Save File',
+                                    filetypes=(('yaml','*.yaml'),('All','*')))
+        with open(filename,'r') as fid:
+            data = yaml.safe_load(fid)
+            
+        # add images as tabs
+        for i,val in enumerate(data):
+            
+            # add tab
+            self._add_tab(os.path.join(self.cwd,val['id']))
+            tab = self.tabs[-1]
+            
+            # set tab style
+            tab.style.set(val['style'])
+            tab.combo_style.event_generate("<<ComboboxSelected>>")
+            
+            # set tab black
+            tab.entry_black.delete(0,END)
+            tab.entry_black.insert(0,str(val['black']))
+            
+            # set tab color
+            if val['cmap'][-1] == 'r':    
+                color = val['cmap'][:-2]
+                tab.input_objs['imap'][0].set(True)
+            else:
+                color = color = val['cmap']
+                tab.input_objs['imap'][0].set(fits_tab.colours[color])
+            
+            tab.input_objs['cmap'][0].set(color)
+            
+            # set tab alpha
+            tab.input_objs['alpha'][0].set(int(val['alpha']*100))
+            
+            # set contours
+            if 'nlevels' in val.keys():
+                tab.input_objs['nlevels'][0].set(val['nlevels'])
+                
+            # set sigma
+            if 'sigma' in val.keys():
+                tab.input_objs['sigma'][0].set(val['sigma'])
+            
+            # draw the image
+            if i == 0:
+                tab.draw_new()
+            else:
+                tab.draw()
+        
     # ======================================================================= #
     def set_icon(self,window):
         """Set the icon for new windows"""

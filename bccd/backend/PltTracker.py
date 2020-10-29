@@ -397,7 +397,7 @@ class PltTracker(object):
         
         # get paramters for drawn objs
         draw_objs = self.gca().draw_objs.values()
-        objs = {}
+        objs = []
         for drawo in draw_objs:
             
             for i,draw in enumerate(drawo):
@@ -405,7 +405,7 @@ class PltTracker(object):
                 if '.bccd/' in draw[1]['id']:
                     draw[1]['id'] = draw[1]['id'].split('.bccd/')[1]
                 
-                objs[draw[1]['id']+' (%d)'%i] = draw[1]
+                objs.append(draw[1])
         
         # write text file with details
         yaml_file = os.path.splitext(filename)[0]+'.yaml'

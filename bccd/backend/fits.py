@@ -208,7 +208,7 @@ class fits(object):
         
         # draw
         self.plt.imshow(id=self.filename,X=data,alpha=alpha,cmap=cmap,
-                        info={  'style':'greyscale', 
+                        info={  'style':'Greyscale', 
                                 'black':self.black, 
                                 'exposure_s':self.header['EXPOSURE'],
                                 'date':self.datetime
@@ -262,8 +262,8 @@ class fits(object):
         ax = self.plt.gca()
         
         options = {k:val for k,val in self.show_options.items() if k != "interpolation"}
-        self.plt.contour(self.filename,X,Y,data,levels=nlevels,cmap=cmap,
-                         info={ 'style':'contour', 
+        self.plt.contour(self.filename,X,Y,data,levels=nlevels,cmap=cmap,alpha=alpha,
+                         info={ 'style':'Contours', 
                                 'black':self.black,
                                 'exposure_s':self.header['EXPOSURE'],
                                 'date':self.datetime
@@ -295,7 +295,7 @@ class fits(object):
         # draw
         edges = np.ma.masked_where(~edges,edges.astype(int))
         self.plt.imshow(self.filename, edges, alpha=alpha, cmap=cmap, 
-                        info={  'style':'edges', 
+                        info={  'style':'Edges', 
                                 'black':self.black,
                                 'exposure_s':self.header['EXPOSURE'],
                                 'date':self.datetime
@@ -323,7 +323,7 @@ class fits(object):
                         sbl,
                         alpha=alpha,
                         cmap=cmap,
-                        info={  'style':'sobel', 
+                        info={  'style':'Gradient', 
                                 'black':self.black,
                                 'exposure_s':self.header['EXPOSURE'],
                                 'date':self.datetime

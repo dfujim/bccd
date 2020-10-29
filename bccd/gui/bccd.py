@@ -326,8 +326,8 @@ class bccd(object):
             os.makedirs(dest, exist_ok=True)
             
             # rsync
-            print("Fetching data from %s..." % loc)
-            subprocess.call(['rsync', '-az', '--min-size=1', os.path.join(loc,'*'), dest])
+            print("Fetching data from %s:" % loc,flush=True)
+            subprocess.call(['rsync', '-az', '--progress', os.path.join(loc,'*'), dest])
             
     # ====================================================================== #
     def key_ctrl_l(self,*args):

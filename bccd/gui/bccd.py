@@ -38,6 +38,7 @@ class bccd(object):
             
             mainframe: frame for root
             notebook: notebook for adding files
+            sync: BooleanVar, if true, sync data with remote servers
             tabs: list of fits_tabs objects which have been fetched fits_tabs
             targets: list of popup_target objects
     """
@@ -166,10 +167,18 @@ class bccd(object):
         
         # File
         menu_file = Menu(menubar)
+        
         menu_file.add_command(label='Load From Yaml', command=self.load)
         menu_file.add_command(label='Close All Figures', command=self.close_all)
         menu_file.add_command(label='Exit', command=sys.exit)
         menubar.add_cascade(menu=menu_file, label='File')
+        
+        # sync
+        self.sync = BooleanVar()
+        self.sync.set(True)
+        menubar.add_checkbutton(label="Remote Sync",\
+                variable=self.sync,selectcolor=colors.selected)
+        
         
         # Top Notebook --------------------------------------------------------
         noteframe = ttk.Frame(self.mainframe, relief='sunken', pad=5)
@@ -319,6 +328,9 @@ class bccd(object):
     def get_data(self):
         """Fetch the images from a remote location"""
         
+        if not self.sync.get():
+            return
+        
         for loc in self.data_remote:
             
             # make destination location 
@@ -327,7 +339,13 @@ class bccd(object):
             
             # rsync
             print("Fetching data from %s:" % loc,flush=True)
-            subprocess.call(['rsync', '-az', '--progress', os.path.join(loc,'*'), dest])
+            subprocess.call(['rsync', 
+                             '-az', 
+                             '--progress', 
+                             '--update',
+                             '--inplace',
+                             '--human-readable',
+                             os.path.join(loc,'*'), dest])
             
     # ====================================================================== #
     def key_ctrl_l(self,*args):

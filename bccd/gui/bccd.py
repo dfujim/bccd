@@ -3,18 +3,17 @@
 # Sep 2020
 
 from tkinter import *
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, messagebox
 
 # set MPL backend
 import matplotlib as mpl
 mpl.use('TkAgg')
 
-import sys, os, datetime
+import sys, os, datetime, yaml, subprocess, textwrap
 import matplotlib.pyplot as plt
 import numpy as np
 import weakref as wref
 import subprocess
-import yaml
 
 from bccd import __version__, icon_path
 from bccd.backend.PltTracker import PltTracker
@@ -169,6 +168,7 @@ class bccd(object):
         menu_file = Menu(menubar)
         
         menu_file.add_command(label='Load From Yaml', command=self.load)
+        menu_file.add_command(label='Show keyboard shortcuts', command=self.show_keys)
         menu_file.add_command(label='Close All Figures', command=self.close_all)
         menu_file.add_command(label='Exit', command=sys.exit)
         menubar.add_cascade(menu=menu_file, label='File')
@@ -178,7 +178,6 @@ class bccd(object):
         self.sync.set(True)
         menubar.add_checkbutton(label="Remote Sync",\
                 variable=self.sync,selectcolor=colors.selected)
-        
         
         # Top Notebook --------------------------------------------------------
         noteframe = ttk.Frame(self.mainframe, relief='sunken', pad=5)
@@ -491,3 +490,24 @@ class bccd(object):
         except Exception as err:
             print(err)
         
+
+    # ======================================================================= #
+    def show_keys(self):
+        """
+            Show message box with keyboard shortcuts
+        """
+        message = \
+        """
+        Command             Action
+        
+        <ctrl> + <l>        Add last
+        <ctrl> + <o>        Add image
+        <ctrl> + <t>        New target
+        <ctrl> + <w>        Close tab
+        <ctrl> + <#>        Switch tab
+        <return>            Superimpose
+        <ctrl> + <return>   Draw new
+        """
+        
+        messagebox.showinfo(title="Keyboard Shortcuts",
+                            message=textwrap.dedent(message))

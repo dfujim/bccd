@@ -142,7 +142,7 @@ class fits_tab(object):
         r = 0
         
         frame_column0 = ttk.Frame(tab_frame, relief='sunken', pad=5)
-        frame_column0.grid(column=0, row=0, rowspan=10, sticky=(N, W), padx=5, pady=5)
+        frame_column0.grid(column=0, row=0, sticky=(N, W, E), padx=5, pady=5)
         
         # show main title and exposure
         ttk.Label(frame_column0, 
@@ -207,7 +207,7 @@ class fits_tab(object):
         button_close.grid(column=10, row=0, sticky=(N, E), pady=5)
         
         # resizing
-        tab_frame.grid_columnconfigure(9, weight=1)        # main area
+        tab_frame.grid_columnconfigure(0, weight=1)        # main area
         tab_frame.grid_rowconfigure(9, weight=1)            # main area
     
     # ======================================================================= #

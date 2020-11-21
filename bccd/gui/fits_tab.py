@@ -268,8 +268,16 @@ class fits_tab(object):
         """
             Draw in a new window
         """
+        
+        # draw
         self.plt.figure()
         self.draw()
+        
+        # draw targets
+        bccd = self.bccd
+        if bccd.draw_new_target.get():
+            for t in bccd.targets:
+                t.draw()
         
     # ======================================================================= #
     def input_place(self, frame, row):

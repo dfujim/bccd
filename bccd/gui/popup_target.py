@@ -131,7 +131,7 @@ class popup_target(object):
         self.win = win
         
     # ====================================================================== #
-    def draw(self,*args):
+    def draw(self, *args):
         """
             Add the target to the open figure
             Disable the radio buttons

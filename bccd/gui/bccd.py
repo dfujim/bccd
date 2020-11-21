@@ -34,7 +34,8 @@ class bccd(object):
         Build the mainframe and set up the runloop for the tkinter GUI. 
         
         Data Fields:
-            
+       
+            draw_new_target: BooleanVar, if true, draw new also draws targets
             mainframe: frame for root
             notebook: notebook for adding files
             sync: BooleanVar, if true, sync data with remote servers
@@ -153,6 +154,9 @@ class bccd(object):
                       'alpha':1., 
                       'fillstyle':'full'}
         
+        # minimum window size
+        root.minsize(400,10)
+        
         # main frame
         self.mainframe = ttk.Frame(root, pad=5)
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
@@ -178,6 +182,12 @@ class bccd(object):
         self.sync.set(True)
         menubar.add_checkbutton(label="Remote Sync",\
                 variable=self.sync,selectcolor=colors.selected)
+        
+        # draw with targets
+        self.draw_new_target = BooleanVar()
+        self.draw_new_target.set(True)
+        menubar.add_checkbutton(label="Draw New With Targets",\
+                variable=self.draw_new_target, selectcolor=colors.selected)
         
         # Top Notebook --------------------------------------------------------
         noteframe = ttk.Frame(self.mainframe, relief='sunken', pad=5)
@@ -490,7 +500,6 @@ class bccd(object):
         except Exception as err:
             print(err)
         
-
     # ======================================================================= #
     def show_keys(self):
         """

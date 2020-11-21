@@ -18,7 +18,7 @@ from matplotlib.patches import Circle
 import skimage as ski
 from skimage import filters
 from skimage.feature import canny
-from skimage.transform import hough_circle,hough_circle_peaks
+from skimage.transform import hough_circle, hough_circle_peaks
 from skimage.transform import probabilistic_hough_line
 from skimage.transform import rescale
 
@@ -40,13 +40,13 @@ class fits(object):
             filename:       name of the file
             header:         dict, header information
             
-            mask:           (x,y,r) specifying circle to mask on
+            mask:           (x, y, r) specifying circle to mask on
             
             plt:            PltTracker object or None
-            result_center:      (par,names) fitting results
-            result_cm:          (par,names) center of mass results
-            result_fit2D:       (par,cov) fitting results
-            result_gaussian2D:  (par,cov,names) fitting results
+            result_center:      (par, names) fitting results
+            result_cm:          (par, names) center of mass results
+            result_fit2D:       (par, cov) fitting results
+            result_gaussian2D:  (par, cov, names) fitting results
             result_gaussian2D_overlap: float, overlap
             
         Colormaps: 
@@ -61,18 +61,18 @@ class fits(object):
                 
             https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
     """
-    show_options = {'origin':'lower',
+    show_options = {'origin':'lower', 
                     'interpolation':'nearest'}
     
     # ======================================================================= #
-    def __init__(self,filename, plt=None, rescale_pixels=True):
+    def __init__(self, filename, plt=None, rescale_pixels=True):
         """
             Read the file
             self.plt: plot tracker
             rescale_pixels: if True, rescale image such that pixels are square
         """
         self.filename = filename
-        self.read(filename,rescale_pixels=rescale_pixels)
+        self.read(filename, rescale_pixels=rescale_pixels)
         self.data_original = np.copy(self.data)
         self.set_mask(None)
         
@@ -82,7 +82,7 @@ class fits(object):
             self.plt = plt
             
     # ======================================================================= #
-    def detect_lines(self,sigma=1,min_length=50,min_gap=3,theta=None,nlines=np.inf,
+    def detect_lines(self, sigma=1, min_length=50, min_gap=3, theta=None, nlines=np.inf, 
                      draw=True):
         """
             Detect lines in image
@@ -92,7 +92,7 @@ class fits(object):
             min_gap:    minimum gap between pixels to avoid breaking the line    
             theta:      list of acceptable angles for the lines to point
             
-            returns: list of points ((x0,y0),(x1,y1)) to identify the end points of 
+            returns: list of points ((x0, y0), (x1, y1)) to identify the end points of 
                      the lines
         """
         
@@ -100,17 +100,17 @@ class fits(object):
         data = self.data
         
         # get edges
-        edges = canny(data,sigma=sigma, low_threshold=0, high_threshold=1)
+        edges = canny(data, sigma=sigma, low_threshold=0, high_threshold=1)
         
         # select lines
-        lines = probabilistic_hough_line(edges,threshold=10,line_length=min_length,
-                                         line_gap=min_gap,theta=theta)
+        lines = probabilistic_hough_line(edges, threshold=10, line_length=min_length, 
+                                         line_gap=min_gap, theta=theta)
         # draw
         if draw:
             self.plt.figure()
-            self.plt.imshow(data,alpha=1,cmap='Greys_r',**self.show_options)
-            edges = np.ma.masked_where(~edges,edges.astype(int))
-            self.plt.imshow(edges,alpha=1,cmap='Reds_r',**self.show_options)
+            self.plt.imshow(data, alpha=1, cmap='Greys_r', **self.show_options)
+            edges = np.ma.masked_where(~edges, edges.astype(int))
+            self.plt.imshow(edges, alpha=1, cmap='Reds_r', **self.show_options)
             
             for line in lines:
                 self.plt.plot(*tuple(np.array(line).T))
@@ -119,8 +119,8 @@ class fits(object):
         return lines
 
     # ======================================================================= #
-    def detect_hlines(self,sigma=1,min_length=50,min_gap=3,nlines=np.inf,
-                   draw=True,**kwargs):
+    def detect_hlines(self, sigma=1, min_length=50, min_gap=3, nlines=np.inf, 
+                   draw=True, **kwargs):
         """
             Detect horizontal lines in image
             
@@ -132,30 +132,30 @@ class fits(object):
         """
         
         # make a set of ranges about pi/2
-        theta = np.linspace(np.pi/2-0.01,np.pi/2+0.01,30)
+        theta = np.linspace(np.pi/2-0.01, np.pi/2+0.01, 30)
         
         # get lines 
-        lines = get_lines(sigma=sigma,
-                          min_length=min_length,
-                          min_gap=min_gap,
-                          nlines=nlines,
-                          draw=draw,
-                          theta=theta,
+        lines = get_lines(sigma=sigma, 
+                          min_length=min_length, 
+                          min_gap=min_gap, 
+                          nlines=nlines, 
+                          draw=draw, 
+                          theta=theta, 
                           **kwargs)
         
         # get y values of lines 
         return [l[0][1] for l in lines]
     
     # ======================================================================= #
-    def detect_circles(self,rad_range,nlines=1,sigma=1,draw=True):
+    def detect_circles(self, rad_range, nlines=1, sigma=1, draw=True):
         """
             Detect circles in image
             
-            rad_range:  specify raidus search range (lo,hi)
+            rad_range:  specify raidus search range (lo, hi)
             alpha:      draw transparency
             nlines:     number of circles to find
             
-            returns: (center_x,center_y,radius)
+            returns: (center_x, center_y, radius)
         """
         
         # get raw data
@@ -163,32 +163,32 @@ class fits(object):
         data[self.data.mask] = self.black
         
         # get edges
-        edges = canny(data,sigma=sigma, low_threshold=0, high_threshold=1)
+        edges = canny(data, sigma=sigma, low_threshold=0, high_threshold=1)
         
         # get radii
         hough_radii = np.arange(*rad_range, 2)
         hough_res = hough_circle(edges, hough_radii)
         
         # select cicles 
-        accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii,
+        accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii, 
                                                     total_num_peaks=nlines)
         
         # draw
         if draw:
-            self.plt.imshow(self.filename,data,alpha=1,cmap='Greys_r',**self.show_options)
-            edges = np.ma.masked_where(~edges,edges.astype(int))
-            self.plt.imshow(self.filename+'edges',edges,alpha=1,cmap='Reds_r',**self.show_options)
+            self.plt.imshow(self.filename, data, alpha=1, cmap='Greys_r', **self.show_options)
+            edges = np.ma.masked_where(~edges, edges.astype(int))
+            self.plt.imshow(self.filename+'edges', edges, alpha=1, cmap='Reds_r', **self.show_options)
             
             for center_y, center_x, radius in zip(cy, cx, radii):
-                circle = Circle((center_x,center_y),radius,
-                            facecolor='none',linewidth=1,edgecolor='g')
+                circle = Circle((center_x, center_y), radius, 
+                            facecolor='none', linewidth=1, edgecolor='g')
                 self.plt.gca().add_patch(circle)
                 
         # return 
-        return (cx,cy,radii)
+        return (cx, cy, radii)
     
     # ======================================================================= #
-    def draw(self,black=None,alpha=1,cmap='Greys',imap=True):
+    def draw(self, black=None, alpha=1, cmap='Greys', imap=True):
         """
             Draw fits file to matplotlib figure
             
@@ -207,16 +207,16 @@ class fits(object):
         if imap: cmap+='_r'
         
         # draw
-        self.plt.imshow(id=self.filename,X=data,alpha=alpha,cmap=cmap,
+        self.plt.imshow(id=self.filename, X=data, alpha=alpha, cmap=cmap, 
                         info={  'style':'Greyscale', 
                                 'black':self.black, 
-                                'exposure_s':self.header['EXPOSURE'],
+                                'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
-                            },
+                            }, 
                         **self.show_options)
     
     # ======================================================================= #    
-    def draw_2Dfit(self,fn,*pars,levels=10,cmap='jet'):
+    def draw_2Dfit(self, fn, *pars, levels=10, cmap='jet'):
         """
             Draw the fit function as contours
         
@@ -228,21 +228,21 @@ class fits(object):
         # get function image
         x = np.arange(shape[1])    
         y = np.arange(shape[0])    
-        gauss = np.zeros((len(y),len(x)))
+        gauss = np.zeros((len(y), len(x)))
         for i in y:
-            gauss[i-y[0],:] = fn(x,i,*pars)
+            gauss[i-y[0], :] = fn(x, i, *pars)
 
         # draw image
-        X,Y = np.meshgrid(x,y)
+        X, Y = np.meshgrid(x, y)
         ax = self.plt.gca()
-        contours = ax.contour(X,Y,gauss,levels=levels,cmap=cmap)
-        ax.clabel(contours,inline=True,fontsize='x-small',fmt='%g')
+        contours = ax.contour(X, Y, gauss, levels=levels, cmap=cmap)
+        ax.clabel(contours, inline=True, fontsize='x-small', fmt='%g')
         
         self.contours = contours
         return contours
 
     # ======================================================================= #
-    def draw_contour(self,nlevels=5,alpha=1,cmap='Greys',imap=True):
+    def draw_contour(self, nlevels=5, alpha=1, cmap='Greys', imap=True):
         """
             Draw contours of fits file to matplotlib figure
             
@@ -258,20 +258,20 @@ class fits(object):
         if imap: cmap+='_r'
         
         # draw
-        X,Y = np.meshgrid(*tuple(map(np.arange,data.shape[::-1])))
+        X, Y = np.meshgrid(*tuple(map(np.arange, data.shape[::-1])))
         ax = self.plt.gca()
         
-        options = {k:val for k,val in self.show_options.items() if k != "interpolation"}
-        self.plt.contour(self.filename,X,Y,data,levels=nlevels,cmap=cmap,alpha=alpha,
+        options = {k:val for k, val in self.show_options.items() if k != "interpolation"}
+        self.plt.contour(self.filename, X, Y, data, levels=nlevels, cmap=cmap, alpha=alpha, 
                          info={ 'style':'Contours', 
-                                'black':self.black,
-                                'exposure_s':self.header['EXPOSURE'],
+                                'black':self.black, 
+                                'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
-                            },
+                            }, 
                          **options)
     
     # ======================================================================= #
-    def draw_edges(self,sigma=1,alpha=1,cmap='Greys',imap=True):
+    def draw_edges(self, sigma=1, alpha=1, cmap='Greys', imap=True):
         """
             Draw fits file to matplotlib figure
             
@@ -287,23 +287,23 @@ class fits(object):
         # get edges
         data2 = np.copy(data)
         data2[data.mask] = self.black
-        edges = canny(data2,sigma=sigma,low_threshold=0, high_threshold=1)
+        edges = canny(data2, sigma=sigma, low_threshold=0, high_threshold=1)
         
         # color map
         if imap: cmap += '_r'
         
         # draw
-        edges = np.ma.masked_where(~edges,edges.astype(int))
+        edges = np.ma.masked_where(~edges, edges.astype(int))
         self.plt.imshow(self.filename, edges, alpha=alpha, cmap=cmap, 
                         info={  'style':'Edges', 
-                                'black':self.black,
-                                'exposure_s':self.header['EXPOSURE'],
+                                'black':self.black, 
+                                'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
-                            },
+                            }, 
                         **self.show_options)
         
     # ======================================================================= #
-    def draw_sobel(self,alpha=1,cmap='Greys',imap=False):
+    def draw_sobel(self, alpha=1, cmap='Greys', imap=False):
         """
             Draw fits file to matplotlib figure
             
@@ -320,20 +320,20 @@ class fits(object):
         sbl = filters.sobel(data)
         sbl[self.data.mask]=0
         self.plt.imshow(self.filename, 
-                        sbl,
-                        alpha=alpha,
-                        cmap=cmap,
+                        sbl, 
+                        alpha=alpha, 
+                        cmap=cmap, 
                         info={  'style':'Gradient', 
-                                'black':self.black,
-                                'exposure_s':self.header['EXPOSURE'],
+                                'black':self.black, 
+                                'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
-                            },
+                            }, 
                         **self.show_options)
     
         return sbl
         
     # ======================================================================= #
-    def fit2D(self,function,**fitargs):
+    def fit2D(self, function, **fitargs):
         """
             Fit general function to fits file
             
@@ -343,12 +343,12 @@ class fits(object):
         """
         
         # get data and trim the edges
-        data = self.data[:300,:200]
+        data = self.data[:300, :200]
         
         # flatten the image
         flat = np.ravel(data)
         
-        # get number of fit parameters (first two are x,y)
+        # get number of fit parameters (first two are x, y)
         npar = function.__code__.co_argcount-2
         if 'p0' not in fitargs:
             fitargs['p0'] = np.ones(npar)
@@ -361,19 +361,19 @@ class fits(object):
         flat /= np.max(flat)
         
         # flatten the funtion 
-        def fitfn(xy,*pars):    
-            output = function(*xy,*pars)
+        def fitfn(xy, *pars):    
+            output = function(*xy, *pars)
             return np.ravel(output)
         
         # fit
         x = np.indices(data.shape)[::-1]
-        par,cov = curve_fit(fitfn,x,flat,**fitargs)
+        par, cov = curve_fit(fitfn, x, flat, **fitargs)
         
-        self.result_fit2D = (par,cov)
-        return (par,cov)
+        self.result_fit2D = (par, cov)
+        return (par, cov)
     
     # ======================================================================= #    
-    def fit_gaussian2D(self,draw=True,**fitargs):
+    def fit_gaussian2D(self, draw=True, **fitargs):
         """
             Fit 2D gaussian to image
             
@@ -394,44 +394,44 @@ class fits(object):
         width_y = np.sqrt(np.abs((np.arange(row.size)-x)**2*row).sum()/row.sum()) 
         
         # fit 
-        p0 = (x,y,width_x,width_y,1,0)
-        par,cov = self.fit2D(gaussian2D,p0=p0)
+        p0 = (x, y, width_x, width_y, 1, 0)
+        par, cov = self.fit2D(gaussian2D, p0=p0)
         std = np.diag(cov)**0.5
         
         # make output
-        df = pd.DataFrame({"result":par,"error":std},
-                            index=('x0','y0','sigmax','sigmay','amp','theta'))
+        df = pd.DataFrame({"result":par, "error":std}, 
+                            index=('x0', 'y0', 'sigmax', 'sigmay', 'amp', 'theta'))
         
         # draw output
         if draw:
             self.plt.figure()    
             self.draw()
-            contours = self.draw_2Dfit(gaussian2D,*par[:4],1,0,**fitargs)
+            contours = self.draw_2Dfit(gaussian2D, *par[:4], 1, 0, **fitargs)
             
-            self.plt.xlim((par[0]-4*par[2],par[0]+4*par[2]))
-            self.plt.ylim((par[1]-4*par[3],par[1]+4*par[3]))
-            self.plt.gca().clabel(contours,inline=True,fontsize='x-small',fmt='%g')
+            self.plt.xlim((par[0]-4*par[2], par[0]+4*par[2]))
+            self.plt.ylim((par[1]-4*par[3], par[1]+4*par[3]))
+            self.plt.gca().clabel(contours, inline=True, fontsize='x-small', fmt='%g')
     
         self.result_gaussian2D = df
         
         return df
     
     # ======================================================================= #    
-    def get_center(self,draw=True):
+    def get_center(self, draw=True):
         """
             Get image center of mass
             
             draw:       if true, draw the output
-            returns:    x0,y0,sigx,sigy
+            returns:    x0, y0, sigx, sigy
         """
         
         # get raw data
         data = self.data
-        black = max(self.black,self.header['BZERO'])
+        black = max(self.black, self.header['BZERO'])
             
         # compress
-        sumx = np.ma.mean(data,axis=0)
-        sumy = np.ma.mean(data,axis=1)
+        sumx = np.ma.mean(data, axis=0)
+        sumy = np.ma.mean(data, axis=1)
         
         # shift baseline
         sumx -= black
@@ -445,45 +445,45 @@ class fits(object):
         sumy /= normy
         
         # fit with gaussian
-        gaus = lambda x,x0,sig,amp,base : amp*np.exp(-((x-x0)/(2*sig))**2)+base
+        gaus = lambda x, x0, sig, amp, base : amp*np.exp(-((x-x0)/(2*sig))**2)+base
         
-        parx,cov = curve_fit(gaus,np.arange(len(sumx)),sumx,p0=(180,10,1,0),
-                                bounds=((0,0,0,-np.inf),np.inf))
+        parx, cov = curve_fit(gaus, np.arange(len(sumx)), sumx, p0=(180, 10, 1, 0), 
+                                bounds=((0, 0, 0, -np.inf), np.inf))
         stdx = np.diag(cov)**0.5
         
-        pary,cov = curve_fit(gaus,np.arange(len(sumy)),sumy,p0=(260,10,1,0),
-                                bounds=((0,0,0,-np.inf),np.inf))
+        pary, cov = curve_fit(gaus, np.arange(len(sumy)), sumy, p0=(260, 10, 1, 0), 
+                                bounds=((0, 0, 0, -np.inf), np.inf))
         stdy = np.diag(cov)**0.5               
         
         # draw
         if draw:
             self.plt.figure()
-            self.plt.plot(sumx*normx,label='x')
-            self.plt.plot(sumy*normy,label='y')
+            self.plt.plot(sumx*normx, label='x')
+            self.plt.plot(sumy*normy, label='y')
             
-            fitx = np.linspace(0,max(len(sumx),len(sumy)),5000)
-            self.plt.plot(fitx,gaus(fitx,*parx)*normx,color='k')
-            self.plt.plot(fitx,gaus(fitx,*pary)*normy,color='k')     
+            fitx = np.linspace(0, max(len(sumx), len(sumy)), 5000)
+            self.plt.plot(fitx, gaus(fitx, *parx)*normx, color='k')
+            self.plt.plot(fitx, gaus(fitx, *pary)*normy, color='k')     
             self.plt.legend()
             
             self.plt.figure()
-            self.plt.imshow(self.filename,data,cmap='Greys_r',**self.show_options)
-            self.plt.errorbar(parx[0],pary[0],xerr=2*parx[1],yerr=2*pary[1],fmt='o',
-                          fillstyle='none',markersize=9)
+            self.plt.imshow(self.filename, data, cmap='Greys_r', **self.show_options)
+            self.plt.errorbar(parx[0], pary[0], xerr=2*parx[1], yerr=2*pary[1], fmt='o', 
+                          fillstyle='none', markersize=9)
                           
             if pary[1] > 2 and parx[1] > 2:
-                self.plt.ylim(pary[0]-pary[1]*6,pary[0]+pary[1]*6)   
-                self.plt.xlim(parx[0]-parx[1]*6,parx[0]+parx[1]*6)
+                self.plt.ylim(pary[0]-pary[1]*6, pary[0]+pary[1]*6)   
+                self.plt.xlim(parx[0]-parx[1]*6, parx[0]+parx[1]*6)
                 
                 
-        self.result_center = ((parx[0],pary[0],parx[1],pary[1]),
-                              ('x0','y0','sigx','sigy'))
+        self.result_center = ((parx[0], pary[0], parx[1], pary[1]), 
+                              ('x0', 'y0', 'sigx', 'sigy'))
                 
         # return 
-        return (parx[0],pary[0],parx[1],pary[1])
+        return (parx[0], pary[0], parx[1], pary[1])
 
     # ======================================================================= #
-    def get_cm(self,draw=True):
+    def get_cm(self, draw=True):
         """
             Get image center of mass
             
@@ -494,8 +494,8 @@ class fits(object):
         data = self.data
         
         # compress
-        sumx = np.ma.mean(data,axis=0)
-        sumy = np.ma.mean(data,axis=1)
+        sumx = np.ma.mean(data, axis=0)
+        sumy = np.ma.mean(data, axis=1)
         
         # estimate center with weighted average
         sumx -= np.ma.min(sumx)
@@ -504,22 +504,22 @@ class fits(object):
         nsumx = len(sumx)
         nsumy = len(sumy)
         
-        cx = np.ma.average(np.arange(nsumx),weights=sumx)
-        cy = np.ma.average(np.arange(nsumy),weights=sumy)
+        cx = np.ma.average(np.arange(nsumx), weights=sumx)
+        cy = np.ma.average(np.arange(nsumy), weights=sumy)
 
         # draw
         if draw:
             self.plt.figure()
-            self.plt.imshow(self.filename,data,cmap='Greys_r',**self.show_options)
-            self.plt.plot(cx,cy,'x')
+            self.plt.imshow(self.filename, data, cmap='Greys_r', **self.show_options)
+            self.plt.plot(cx, cy, 'x')
                 
-        self.result_cm = ((cx,cy),('x0','y0'))
+        self.result_cm = ((cx, cy), ('x0', 'y0'))
         
         # return 
-        return (cx,cy)
+        return (cx, cy)
 
     # ======================================================================= #
-    def get_gaussian2D_overlap(self,ylo,yhi,xlo,xhi):
+    def get_gaussian2D_overlap(self, ylo, yhi, xlo, xhi):
         """
             Get integral of gaussian2D PDF within some interval, normalized to the 
             area such that the returned overlap is the event probability within the 
@@ -532,14 +532,14 @@ class fits(object):
             
                 integration is: 
                     
-                    int_y int_x G(x,y) dx dy
+                    int_y int_x G(x, y) dx dy
             
             
             returns overlap as given by dblquad
         """
         
         # get fitting results 
-        x0,y0,sx,sy,amp,theta = self.result_gaussian2D['result']
+        x0, y0, sx, sy, amp, theta = self.result_gaussian2D['result']
         
         # get normalized volume
         # https://en.wikipedia.org/wiki/Gaussian_function
@@ -551,16 +551,16 @@ class fits(object):
         amp = 1/(2*np.pi*sx*sy)
         
         # make PDF
-        gaus = lambda x,y: gaussian2D(x,y,x0,y0,sx,sy,amp,theta)
+        gaus = lambda x, y: gaussian2D(x, y, x0, y0, sx, sy, amp, theta)
         
         # integrate: fraction of beam overlap
-        overlap =  dblquad(gaus,ylo,yhi,xlo,xhi)[0]
+        overlap =  dblquad(gaus, ylo, yhi, xlo, xhi)[0]
         
         self.result_gaussian2D_overlap = overlap
         return overlap
         
     # ======================================================================= #
-    def read(self,filename,rescale_pixels=True):
+    def read(self, filename, rescale_pixels=True):
         """
             Get xy data from fits file. Values are brightness of pixel. 
             
@@ -569,7 +569,7 @@ class fits(object):
         """
         
         # open the file
-        filename = os.path.join(os.getcwd(),filename)
+        filename = os.path.join(os.getcwd(), filename)
         fid = astrofits.open(filename)[0]
         
         # read the header
@@ -587,10 +587,10 @@ class fits(object):
             aspect = self.header['YPIXSZ']/self.header['XPIXSZ']
             
             # always enlarge image, never make it smaller
-            if aspect > 1:      resc = (aspect,1)
-            else:               resc = (1,1/aspect)
+            if aspect > 1:      resc = (aspect, 1)
+            else:               resc = (1, 1/aspect)
             
-            data = rescale(data,resc,order=3,multichannel=False,preserve_range=True) 
+            data = rescale(data, resc, order=3, multichannel=False, preserve_range=True) 
         
         self.data = data
         
@@ -601,7 +601,7 @@ class fits(object):
         self.datetime = utc.astimezone(tz=None)
         
     # ======================================================================= #
-    def set_black(self,black):
+    def set_black(self, black):
         """
             Clean, remove lowest values
             
@@ -616,10 +616,10 @@ class fits(object):
         self.set_mask(self.mask)
         
     # ======================================================================= #
-    def set_mask(self,mask):
+    def set_mask(self, mask):
         """
             Mask image data
-            mask:       (x,y,r) specifying center and radius of circle to mask on
+            mask:       (x, y, r) specifying center and radius of circle to mask on
         """
         
         # set the mask input
@@ -632,9 +632,9 @@ class fits(object):
         # masking
         if mask is not None:     
             window = np.ones(self.data.shape)
-            rr,cc = ski.draw.disk((mask[1],mask[0]),mask[2],shape=data.shape)
-            window[rr,cc] = 0
-            data = np.ma.array(data,mask=window)
+            rr, cc = ski.draw.disk((mask[1], mask[0]), mask[2], shape=data.shape)
+            window[rr, cc] = 0
+            data = np.ma.array(data, mask=window)
         
         # make as a masked array
         else:

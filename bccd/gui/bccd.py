@@ -72,24 +72,24 @@ class bccd(object):
         root.rowconfigure(0, weight=1)
         
         # hotkeys
-        root.bind('<Return>',self.key_return)             
-        root.bind('<KP_Enter>',self.key_return)
-        root.bind('<Control-Key-Return>',self.key_ctrl_return)      
-        root.bind('<Control-Key-KP_Enter>',self.key_ctrl_return)
-        root.bind('<Control-Key-1>',lambda x: self.key_ctrl_n(0))
-        root.bind('<Control-Key-2>',lambda x: self.key_ctrl_n(1))
-        root.bind('<Control-Key-3>',lambda x: self.key_ctrl_n(2))
-        root.bind('<Control-Key-4>',lambda x: self.key_ctrl_n(3))
-        root.bind('<Control-Key-5>',lambda x: self.key_ctrl_n(4))
-        root.bind('<Control-Key-6>',lambda x: self.key_ctrl_n(5))
-        root.bind('<Control-Key-7>',lambda x: self.key_ctrl_n(6))
-        root.bind('<Control-Key-8>',lambda x: self.key_ctrl_n(7))
-        root.bind('<Control-Key-9>',lambda x: self.key_ctrl_n(8))
-        root.bind('<Control-Key-0>',lambda x: self.key_ctrl_n(9))
-        root.bind('<Control-w>',self.key_ctrl_w)
-        root.bind('<Control-o>',self.key_ctrl_o)
-        root.bind('<Control-l>',self.key_ctrl_l)
-        root.bind('<Control-t>',self.key_ctrl_t)
+        root.bind('<Return>', self.key_return)             
+        root.bind('<KP_Enter>', self.key_return)
+        root.bind('<Control-Key-Return>', self.key_ctrl_return)      
+        root.bind('<Control-Key-KP_Enter>', self.key_ctrl_return)
+        root.bind('<Control-Key-1>', lambda x: self.key_ctrl_n(0))
+        root.bind('<Control-Key-2>', lambda x: self.key_ctrl_n(1))
+        root.bind('<Control-Key-3>', lambda x: self.key_ctrl_n(2))
+        root.bind('<Control-Key-4>', lambda x: self.key_ctrl_n(3))
+        root.bind('<Control-Key-5>', lambda x: self.key_ctrl_n(4))
+        root.bind('<Control-Key-6>', lambda x: self.key_ctrl_n(5))
+        root.bind('<Control-Key-7>', lambda x: self.key_ctrl_n(6))
+        root.bind('<Control-Key-8>', lambda x: self.key_ctrl_n(7))
+        root.bind('<Control-Key-9>', lambda x: self.key_ctrl_n(8))
+        root.bind('<Control-Key-0>', lambda x: self.key_ctrl_n(9))
+        root.bind('<Control-w>', self.key_ctrl_w)
+        root.bind('<Control-o>', self.key_ctrl_o)
+        root.bind('<Control-l>', self.key_ctrl_l)
+        root.bind('<Control-t>', self.key_ctrl_t)
         
         # styling
         root.option_add('*tearOff', FALSE)
@@ -155,7 +155,7 @@ class bccd(object):
                       'fillstyle':'full'}
         
         # minimum window size
-        root.minsize(400,10)
+        root.minsize(400, 10)
         
         # main frame
         self.mainframe = ttk.Frame(root, pad=5)
@@ -180,13 +180,13 @@ class bccd(object):
         # sync
         self.sync = BooleanVar()
         self.sync.set(True)
-        menubar.add_checkbutton(label="Remote Sync",\
-                variable=self.sync,selectcolor=colors.selected)
+        menubar.add_checkbutton(label="Remote Sync", \
+                variable=self.sync, selectcolor=colors.selected)
         
         # draw with targets
         self.draw_new_target = BooleanVar()
         self.draw_new_target.set(True)
-        menubar.add_checkbutton(label="Draw New With Targets",\
+        menubar.add_checkbutton(label="Draw New With Targets", \
                 variable=self.draw_new_target, selectcolor=colors.selected)
         
         # Top Notebook --------------------------------------------------------
@@ -207,7 +207,7 @@ class bccd(object):
         button_add_file.grid(column=1, row=1, sticky=(E, S))
         button_addlast_file.grid(column=2, row=1, sticky=(E, S))
         noteframe.grid(column=0, row=0, sticky=(N, E, W, S), columnspan=4, 
-                       pady=(0,10))
+                       pady=(0, 10))
         noteframe.columnconfigure(0, weight=1)
         noteframe.rowconfigure(0, weight=1)
 
@@ -258,9 +258,9 @@ class bccd(object):
         self.get_data()
         
         # get filename from browser
-        imgfiles = filedialog.askopenfilenames(initialdir=self.cwd,
-                                            title='Select CCD Image',
-                                            filetypes=(('fits','*.fits'),('All','*')))
+        imgfiles = filedialog.askopenfilenames(initialdir=self.cwd, 
+                                            title='Select CCD Image', 
+                                            filetypes=(('fits', '*.fits'), ('All', '*')))
         
         if not imgfiles:
             return
@@ -287,7 +287,7 @@ class bccd(object):
         
         for dirpath, dirnames, filenames in os.walk(self.data_local):
             for f in filenames:
-                fname = os.path.join(dirpath,f)
+                fname = os.path.join(dirpath, f)
                 mod_time = os.stat(fname).st_mtime
                 
                 if mod_time > latest_time:
@@ -347,17 +347,17 @@ class bccd(object):
             os.makedirs(dest, exist_ok=True)
             
             # rsync
-            print("Fetching data from %s:" % loc,flush=True)
+            print("Fetching data from %s:" % loc, flush=True)
             subprocess.call(['rsync', 
                              '-az', 
                              '--progress', 
-                             '--update',
-                             '--inplace',
-                             '--human-readable',
-                             os.path.join(loc,'*'), dest])
+                             '--update', 
+                             '--inplace', 
+                             '--human-readable', 
+                             os.path.join(loc, '*'), dest])
             
     # ====================================================================== #
-    def key_ctrl_l(self,*args):
+    def key_ctrl_l(self, *args):
         """
             Bound to <Control-Key-l>. 
             Open latest file
@@ -365,7 +365,7 @@ class bccd(object):
         self.addlast_file()
     
     # ====================================================================== #
-    def key_ctrl_n(self,n,*args):
+    def key_ctrl_n(self, n, *args):
         """
             Bound to <Control-Key-#>
             Switch to tab n
@@ -376,7 +376,7 @@ class bccd(object):
             pass
         
     # ====================================================================== #
-    def key_ctrl_o(self,*args):
+    def key_ctrl_o(self, *args):
         """
             Bound to <Control-Key-o>
             Open file browser
@@ -384,7 +384,7 @@ class bccd(object):
         self.add_file()
     
     # ====================================================================== #
-    def key_ctrl_t(self,*args):
+    def key_ctrl_t(self, *args):
         """
             Bound to <Control-Key-t>
             New target
@@ -392,7 +392,7 @@ class bccd(object):
         self.addtarget()
         
     # ====================================================================== #
-    def key_ctrl_return(self,*args):
+    def key_ctrl_return(self, *args):
         """
             Bound to <Control-Key-Return> and <Control-Key-KP_Enter>
             Add last image
@@ -405,7 +405,7 @@ class bccd(object):
         tab.draw_new()     
         
     # ====================================================================== #
-    def key_ctrl_w(self,*args):
+    def key_ctrl_w(self, *args):
         """
             Bound to <Control-Key-w>. 
             Closes the open tab
@@ -417,7 +417,7 @@ class bccd(object):
         self.tabs[idx].close()
         
     # ====================================================================== #
-    def key_return(self,*args):
+    def key_return(self, *args):
         """
             Bound to <Return> and <KP_Enter>
             Draws in open window
@@ -443,17 +443,17 @@ class bccd(object):
         """
         
         # get the filename
-        filename = filedialog.askopenfilename(initialdir=os.environ['PWD'],
-                                    title='Select Save File',
-                                    filetypes=(('yaml','*.yaml'),('All','*')))
-        with open(filename,'r') as fid:
+        filename = filedialog.askopenfilename(initialdir=os.environ['PWD'], 
+                                    title='Select Save File', 
+                                    filetypes=(('yaml', '*.yaml'), ('All', '*')))
+        with open(filename, 'r') as fid:
             data = yaml.safe_load(fid)
             
         # add images as tabs
-        for i,val in enumerate(data):
+        for i, val in enumerate(data):
             
             # add tab
-            self._add_tab(os.path.join(self.cwd,val['id']))
+            self._add_tab(os.path.join(self.cwd, val['id']))
             tab = self.tabs[-1]
             
             # set tab style
@@ -461,8 +461,8 @@ class bccd(object):
             tab.combo_style.event_generate("<<ComboboxSelected>>")
             
             # set tab black
-            tab.entry_black.delete(0,END)
-            tab.entry_black.insert(0,str(val['black']))
+            tab.entry_black.delete(0, END)
+            tab.entry_black.insert(0, str(val['black']))
             
             # set tab color
             if val['cmap'][-1] == 'r':    
@@ -492,7 +492,7 @@ class bccd(object):
                 tab.draw()
         
     # ======================================================================= #
-    def set_icon(self,window):
+    def set_icon(self, window):
         """Set the icon for new windows"""
         try:
             img = PhotoImage(file=icon_path)
@@ -518,5 +518,5 @@ class bccd(object):
         <ctrl> + <return>   Draw new
         """
         
-        messagebox.showinfo(title="Keyboard Shortcuts",
+        messagebox.showinfo(title="Keyboard Shortcuts", 
                             message=textwrap.dedent(message))

@@ -1,1 +1,1 @@
-__all__ = ['fits','functions','PltTracker']
+__all__ = ['fits', 'functions', 'PltTracker']

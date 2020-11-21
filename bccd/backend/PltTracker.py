@@ -24,7 +24,7 @@ class PltTracker(object):
         self.active = 0
     
     # ======================================================================= #
-    def _close_figure(self,event):
+    def _close_figure(self, event):
         """Remove figure from list"""
         
         # get number and style
@@ -49,7 +49,7 @@ class PltTracker(object):
             self.active = 0
                         
     # ======================================================================= #
-    def _decorator(self,fn,*args,id=None,unique=True,**kwargs):
+    def _decorator(self, fn, *args, id=None, unique=True, **kwargs):
         """
             Function wrapper
             
@@ -64,19 +64,19 @@ class PltTracker(object):
             
         # clear old objects
         if unique and id is not None:
-            self._remove_drawn_object(ax,id)
+            self._remove_drawn_object(ax, id)
         
         # run function 
-        output = fn(*args,**kwargs)
+        output = fn(*args, **kwargs)
         
         # track the drawn object
         if id is not None:
-            ax.draw_objs.setdefault(id,[]).append((output,kwargs)) 
+            ax.draw_objs.setdefault(id, []).append((output, kwargs)) 
         
         return output
     
     # ======================================================================= #
-    def _remove_drawn_object(self,ax,draw_id):
+    def _remove_drawn_object(self, ax, draw_id):
         """
             Remove an object labelled by draw_id from the figure, based on draw 
             style.
@@ -125,7 +125,7 @@ class PltTracker(object):
             del ax.draw_objs[draw_id]
         
    # ======================================================================= #
-    def _update_active_id(self,event):
+    def _update_active_id(self, event):
         """
             Update the active figure id based on click event.
         """
@@ -133,16 +133,16 @@ class PltTracker(object):
         self.active = number
     
     # ======================================================================= #
-    def annotate(self,id,*args,unique=True,**kwargs):
-        return self._decorator(plt.annotate,*args,id=id,unique=unique,**kwargs)
+    def annotate(self, id, *args, unique=True, **kwargs):
+        return self._decorator(plt.annotate, *args, id=id, unique=unique, **kwargs)
     
     # ======================================================================= #
-    def axhline(self,id,*args,unique=True,**kwargs):
-        return self._decorator(plt.axhline,*args,id=id,unique=unique,**kwargs)
+    def axhline(self, id, *args, unique=True, **kwargs):
+        return self._decorator(plt.axhline, *args, id=id, unique=unique, **kwargs)
         
     # ======================================================================= #
-    def axvline(self,id,*args,unique=True,**kwargs):
-        return self._decorator(plt.axvline,*args,id=id,unique=unique,**kwargs)
+    def axvline(self, id, *args, unique=True, **kwargs):
+        return self._decorator(plt.axvline, *args, id=id, unique=unique, **kwargs)
         
     # ======================================================================= #
     def clf(self):
@@ -165,22 +165,22 @@ class PltTracker(object):
         ax = fig.axes[0]
         
         # redraw old objects and lines
-        if unique:  self._remove_drawn_object(ax,id)
-        self._remove_drawn_object(ax,'line')
+        if unique:  self._remove_drawn_object(ax, id)
+        self._remove_drawn_object(ax, 'line')
         
         obj = ax.contour(X, Y, Z, levels, **kwargs)
         
         # check input
         if info is None: info = {}
         
-        saveas = {'id'              :id,
-                  'levels'          :levels,
-                  **info,
+        saveas = {'id'              :id, 
+                  'levels'          :levels, 
+                  **info, 
                   **kwargs
                   }
         
         # save the drawn object to the file
-        ax.draw_objs.setdefault(id,[]).append((obj,saveas))
+        ax.draw_objs.setdefault(id, []).append((obj, saveas))
         
         return obj
         
@@ -188,7 +188,7 @@ class PltTracker(object):
     def errorbar(self, id, x, y, yerr=None, xerr=None, fmt='', ecolor=None, 
                  elinewidth=None, capsize=None, barsabove=False, lolims=False, 
                  uplims=False, xlolims=False, xuplims=False, errorevery=1, 
-                 capthick=None, *, data=None, unique=True, annot_label=None,
+                 capthick=None, *, data=None, unique=True, annot_label=None, 
                  **kwargs):
         """
             Plot data.
@@ -208,8 +208,8 @@ class PltTracker(object):
         ax = fig.axes[0]
         
         # redraw old objects and lines
-        if unique:  self._remove_drawn_object(ax,id)
-        self._remove_drawn_object(ax,'line')
+        if unique:  self._remove_drawn_object(ax, id)
+        self._remove_drawn_object(ax, 'line')
         
         # set up labelling of line objects for mouseover
         if 'label' in kwargs:
@@ -231,29 +231,29 @@ class PltTracker(object):
         if annot_label is not None: 
             ax.lines[-1].annot_label = annot_label
             
-        saveas = {'id'          :id,
-                  'fmt'         :fmt,
-                  'color'       :color,
-                  'ecolor'      :ecolor,
+        saveas = {'id'          :id, 
+                  'fmt'         :fmt, 
+                  'color'       :color, 
+                  'ecolor'      :ecolor, 
                   'elinewidth'  :elinewidth, 
                   'capsize'     :capsize, 
                   'barsabove'   :barsabove, 
                   'lolims'      :lolims, 
                   'uplims'      :uplims, 
-                  'xlolims'     :xlolims,
-                  'xuplims'     :xuplims,
+                  'xlolims'     :xlolims, 
+                  'xuplims'     :xuplims, 
                   'errorevery'  :errorevery, 
-                  'capthick'    :capthick,
-                  **kwargs,
+                  'capthick'    :capthick, 
+                  **kwargs, 
                   }
             
         # save the drawn object to the file
-        ax.draw_objs.setdefault(id,[]).append((obj,saveas))
+        ax.draw_objs.setdefault(id, []).append((obj, saveas))
         
         return obj
     
     # ======================================================================= #
-    def figure(self,**kwargs):
+    def figure(self, **kwargs):
         """
             Make new figure.
             
@@ -276,7 +276,7 @@ class PltTracker(object):
         
         # track drawn objects
         ax = plt.gca()
-        if not hasattr(ax,'draw_objs'):
+        if not hasattr(ax, 'draw_objs'):
             ax.draw_objs = {}
         
         # setup saveas
@@ -298,7 +298,7 @@ class PltTracker(object):
     # ======================================================================= #
     def imshow(self, id, X, cmap=None, norm=None, aspect=None, interpolation=None, 
                 alpha=None, vmin=None, vmax=None, origin=None, extent=None, 
-                filternorm=1, filterrad=4.0, resample=None, url=None, data=None,
+                filternorm=1, filterrad=4.0, resample=None, url=None, data=None, 
                 unique=True, info=None, **kwargs):
         """
             unique: force only one of this id in the figure
@@ -317,7 +317,7 @@ class PltTracker(object):
         ax = fig.axes[0]
         
         # redraw old objects and lines
-        if unique:  self._remove_drawn_object(ax,id)
+        if unique:  self._remove_drawn_object(ax, id)
         
         # set up labelling of line objects for mouseover
         if 'label' in kwargs:
@@ -329,41 +329,41 @@ class PltTracker(object):
         obj = plt.imshow(X=X, cmap=cmap, norm=norm, aspect=aspect, 
                 interpolation=interpolation, alpha=alpha, vmin=vmin, vmax=vmax, 
                 origin=origin, extent=extent, filternorm=filternorm, 
-                filterrad=filterrad, resample=resample, url=url, data=data,
+                filterrad=filterrad, resample=resample, url=url, data=data, 
                 **kwargs)
             
         # check input
         if info is None: info = {}
             
         # save the drawn object to the file
-        saveas = {'id'              :id,
-                  'cmap'            :cmap,
-                  'norm'            :norm,
-                  'aspect'          :aspect,
-                  'interpolation'   :interpolation,
-                  'alpha'           :alpha,
-                  'vmin'            :vmin,
-                  'vmax'            :vmax,
-                  'origin'          :origin,
-                  'extent'          :extent,
-                  'filternorm'      :filternorm,
-                  'filterrad'       :filterrad,
-                  'resample'        :resample,
-                  'url'             :url,
-                  **info,
+        saveas = {'id'              :id, 
+                  'cmap'            :cmap, 
+                  'norm'            :norm, 
+                  'aspect'          :aspect, 
+                  'interpolation'   :interpolation, 
+                  'alpha'           :alpha, 
+                  'vmin'            :vmin, 
+                  'vmax'            :vmax, 
+                  'origin'          :origin, 
+                  'extent'          :extent, 
+                  'filternorm'      :filternorm, 
+                  'filterrad'       :filterrad, 
+                  'resample'        :resample, 
+                  'url'             :url, 
+                  **info, 
                   **kwargs
                   }
         
-        ax.draw_objs.setdefault(id,[]).append((obj,saveas))
+        ax.draw_objs.setdefault(id, []).append((obj, saveas))
         
         return obj
         
     # ======================================================================= #
-    def legend(self,*args,**kwargs):
-        self._decorator(plt.legend,*args,**kwargs)
+    def legend(self, *args, **kwargs):
+        self._decorator(plt.legend, *args, **kwargs)
         
     # ======================================================================= #
-    def plot(self,id,*args,scalex=True,scaley=True,data=None,unique=True,**kwargs):
+    def plot(self, id, *args, scalex=True, scaley=True, data=None, unique=True, **kwargs):
         """
             Plot data.
             
@@ -382,16 +382,16 @@ class PltTracker(object):
         ax = fig.axes[0]
         
         # redraw old objects and lines
-        if unique:  self._remove_drawn_object(ax,id)
-        self._remove_drawn_object(ax,'line')
+        if unique:  self._remove_drawn_object(ax, id)
+        self._remove_drawn_object(ax, 'line')
         
-        obj = plt.plot(*args,scalex=scalex, scaley=scaley, data=data,**kwargs)
-        ax.draw_objs.setdefault(id,[]).append(obj)
+        obj = plt.plot(*args, scalex=scalex, scaley=scaley, data=data, **kwargs)
+        ax.draw_objs.setdefault(id, []).append(obj)
         
         return obj
 
     # ======================================================================= #
-    def savefig_new(self,filename):            
+    def savefig_new(self, filename):            
         """Save figure, alongside yaml file with figure details"""
         fig = self.gcf()
         
@@ -400,7 +400,7 @@ class PltTracker(object):
         objs = []
         for drawo in draw_objs:
             
-            for i,draw in enumerate(drawo):
+            for i, draw in enumerate(drawo):
                 
                 if '.bccd/' in draw[1]['id']:
                     draw[1]['id'] = draw[1]['id'].split('.bccd/')[1]
@@ -409,53 +409,53 @@ class PltTracker(object):
         
         # write text file with details
         yaml_file = os.path.splitext(filename)[0]+'.yaml'
-        with open(yaml_file,'w') as fid:    
+        with open(yaml_file, 'w') as fid:    
             fid.write(yaml.dump(objs))
         
         # write figure
         fig.saveas(filename)
         
     # ======================================================================= #
-    def text(self,*args,id=None,unique=True,**kwargs):
-        return self._decorator(plt.text,*args,id=id,unique=unique,**kwargs)
+    def text(self, *args, id=None, unique=True, **kwargs):
+        return self._decorator(plt.text, *args, id=id, unique=unique, **kwargs)
 
     # ======================================================================= #
-    def tight_layout(self,*args,**kwargs):
-        return self._decorator(plt.tight_layout,*args,**kwargs)
+    def tight_layout(self, *args, **kwargs):
+        return self._decorator(plt.tight_layout, *args, **kwargs)
 
     # ======================================================================= #
-    def xlabel(self,*args,**kwargs):
-        return self._decorator(plt.xlabel,*args,**kwargs)
+    def xlabel(self, *args, **kwargs):
+        return self._decorator(plt.xlabel, *args, **kwargs)
     
     # ======================================================================= #
-    def xlim(self,*args,**kwargs):
-        return self._decorator(plt.xlim,*args,**kwargs)
+    def xlim(self, *args, **kwargs):
+        return self._decorator(plt.xlim, *args, **kwargs)
     
     # ======================================================================= #
-    def xticks(self,*args,**kwargs):
-        return self._decorator(plt.xticks,*args,**kwargs)
+    def xticks(self, *args, **kwargs):
+        return self._decorator(plt.xticks, *args, **kwargs)
     
     # ======================================================================= #
-    def ylabel(self,*args,**kwargs):
-        return self._decorator(plt.ylabel,*args,**kwargs)
+    def ylabel(self, *args, **kwargs):
+        return self._decorator(plt.ylabel, *args, **kwargs)
     
     # ======================================================================= #
-    def ylim(self,*args,**kwargs):
-        return self._decorator(plt.ylim,*args,**kwargs)
+    def ylim(self, *args, **kwargs):
+        return self._decorator(plt.ylim, *args, **kwargs)
     
     # ======================================================================= #
-    def yticks(self,*args,**kwargs):
-        return self._decorator(plt.yticks,*args,**kwargs)
+    def yticks(self, *args, **kwargs):
+        return self._decorator(plt.yticks, *args, **kwargs)
     
     # ======================================================================= #
-    def zlabel(self,*args,**kwargs):
-        return self._decorator(plt.zlabel,*args,**kwargs)
+    def zlabel(self, *args, **kwargs):
+        return self._decorator(plt.zlabel, *args, **kwargs)
     
     # ======================================================================= #
-    def zlim(self,*args,**kwargs):
-        return self._decorator(plt.zlim,*args,**kwargs)
+    def zlim(self, *args, **kwargs):
+        return self._decorator(plt.zlim, *args, **kwargs)
     
     # ======================================================================= #
-    def zticks(self,*args,**kwargs):
-        return self._decorator(plt.zticks,*args,**kwargs)
+    def zticks(self, *args, **kwargs):
+        return self._decorator(plt.zticks, *args, **kwargs)
     

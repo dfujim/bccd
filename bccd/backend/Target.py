@@ -57,7 +57,7 @@ class Target(object):
             raise RuntimeError("Axis already contains this target") 
                 
         # connect with window close
-        ax.figure.canvas.mpl_connect('close_event', partial(self.remove,ax=ax))
+        ax.figure.canvas.mpl_connect('close_event', partial(self.remove, ax=ax))
                 
         # add axes to list
         self.ax_list.append(ax)
@@ -109,7 +109,7 @@ class Circle(Target):
         Data fields:
             pt_center, pt_radius: DraggablePoints
             patches: mpl.patches for patches
-            x,y: center coordinates
+            x, y: center coordinates
             r: radius
     """
 
@@ -127,12 +127,12 @@ class Circle(Target):
         self.patches = []
         
         # center
-        self.pt_center = DraggablePoint(self,self.update_center,
-                            setx=True,sety=True,color=self.color, marker='x')
+        self.pt_center = DraggablePoint(self, self.update_center, 
+                            setx=True, sety=True, color=self.color, marker='x')
         
         # radius
-        self.pt_radius = DraggablePoint(self,self.update_radius,
-                            setx=True,sety=False,color=self.color, marker='o')
+        self.pt_radius = DraggablePoint(self, self.update_radius, 
+                            setx=True, sety=False, color=self.color, marker='o')
         
         self.points = [self.pt_center, self.pt_radius]
         self.update_popup_label()
@@ -144,15 +144,15 @@ class Circle(Target):
         super().draw(ax)
         
         # draw things
-        self.patches.append(patches.Circle((self.x,self.y),self.r,
+        self.patches.append(patches.Circle((self.x, self.y), self.r, 
                                      fill=False, 
-                                     facecolor='none',
-                                     lw=1,
-                                     ls='-',
+                                     facecolor='none', 
+                                     lw=1, 
+                                     ls='-', 
                                      edgecolor=self.color))
         ax.add_patch(self.patches[-1])
         self.pt_center.add_ax(ax, self.x, self.y)
-        self.pt_radius.add_ax(ax, self.x+self.r, self.y,)
+        self.pt_radius.add_ax(ax, self.x+self.r, self.y, )
 
     # ======================================================================= #
     def update_popup_label(self):
@@ -169,7 +169,7 @@ class Circle(Target):
         self.pt_radius.set_ydata(y)
         
         for c in self.patches:
-            c.set_center((x,y))
+            c.set_center((x, y))
         
         self.x = x
         self.y = y
@@ -195,7 +195,7 @@ class Square(Target):
         Data fields:
             pt_center, pt_side: DraggablePoints
             square: mpl.patches for patches
-            x,y: center coordinates
+            x, y: center coordinates
             side: side length
     """
 
@@ -213,12 +213,12 @@ class Square(Target):
         self.patches = []
         
         # center
-        self.pt_center = DraggablePoint(self,self.update_center,
-                            setx=True,sety=True,color=self.color, marker='x')
+        self.pt_center = DraggablePoint(self, self.update_center, 
+                            setx=True, sety=True, color=self.color, marker='x')
         
         # radius
-        self.pt_side = DraggablePoint(self,self.update_side,
-                            setx=True,sety=False,color=self.color, marker='s')
+        self.pt_side = DraggablePoint(self, self.update_side, 
+                            setx=True, sety=False, color=self.color, marker='s')
         
         self.points = [self.pt_center, self.pt_side]
         self.update_popup_label()
@@ -230,13 +230,13 @@ class Square(Target):
         super().draw(ax)
         
         # draw things
-        self.patches.append(patches.Rectangle((self.x-self.side,self.y-self.side),
-                                            width=self.side*2,
-                                            height=self.side*2,
+        self.patches.append(patches.Rectangle((self.x-self.side, self.y-self.side), 
+                                            width=self.side*2, 
+                                            height=self.side*2, 
                                             fill=False, 
-                                            facecolor='none',
-                                            lw=1,
-                                            ls='-',
+                                            facecolor='none', 
+                                            lw=1, 
+                                            ls='-', 
                                             edgecolor=self.color))
         ax.add_patch(self.patches[-1])
         self.pt_center.add_ax(ax, self.x, self.y)
@@ -257,7 +257,7 @@ class Square(Target):
         self.pt_side.set_ydata(y)
         
         for c in self.patches:
-            c.set_xy((x-self.side,y-self.side))
+            c.set_xy((x-self.side, y-self.side))
         
         self.x = x
         self.y = y
@@ -273,7 +273,7 @@ class Square(Target):
         dx = self.side*2
         
         for c in self.patches:
-            c.set_xy((self.x-self.side,self.y-self.side))
+            c.set_xy((self.x-self.side, self.y-self.side))
             c.set_height(dx)
             c.set_width(dx)
             
@@ -286,8 +286,8 @@ class Rectangle(Target):
         Data fields:
             pt_tr, pt_tl, pt_br, pt_bl: DraggablePoints
             patches:    mpl.patches for patches
-            x,y:    center coordinates
-            dx,dy:  side length
+            x, y:    center coordinates
+            dx, dy:  side length
     """
 
     # ======================================================================= #
@@ -305,17 +305,17 @@ class Rectangle(Target):
         self.patches = []
         
         # corner points (tr = top right)
-        self.pt_tl = DraggablePoint(self,self.update_tl,
-                            setx=True,sety=True,color=self.color, marker='s')
+        self.pt_tl = DraggablePoint(self, self.update_tl, 
+                            setx=True, sety=True, color=self.color, marker='s')
         
-        self.pt_tr = DraggablePoint(self,self.update_tr,
-                            setx=True,sety=True,color=self.color, marker='s')
+        self.pt_tr = DraggablePoint(self, self.update_tr, 
+                            setx=True, sety=True, color=self.color, marker='s')
 
-        self.pt_br = DraggablePoint(self,self.update_br,
-                            setx=True,sety=True,color=self.color, marker='s')
+        self.pt_br = DraggablePoint(self, self.update_br, 
+                            setx=True, sety=True, color=self.color, marker='s')
 
-        self.pt_bl = DraggablePoint(self,self.update_bl,
-                            setx=True,sety=True,color=self.color, marker='s')
+        self.pt_bl = DraggablePoint(self, self.update_bl, 
+                            setx=True, sety=True, color=self.color, marker='s')
         
         self.points = [self.pt_tl, self.pt_tr, self.pt_br, self.pt_bl]
         self.update_popup_label()
@@ -327,13 +327,13 @@ class Rectangle(Target):
         super().draw(ax)
         
         # draw things
-        self.patches.append(patches.Rectangle((self.x-self.dx,self.y-self.dy),
-                                            width=self.dx*2,
-                                            height=self.dy*2,
+        self.patches.append(patches.Rectangle((self.x-self.dx, self.y-self.dy), 
+                                            width=self.dx*2, 
+                                            height=self.dy*2, 
                                             fill=False, 
-                                            facecolor='none',
-                                            lw=1,
-                                            ls='-',
+                                            facecolor='none', 
+                                            lw=1, 
+                                            ls='-', 
                                             edgecolor=self.color))
         ax.add_patch(self.patches[-1])
         self.pt_tr.add_ax(ax, self.x+self.dx, self.y+self.dy)
@@ -363,7 +363,7 @@ class Rectangle(Target):
         dy = round(ddy/2)
         
         for c in self.patches:
-            c.set_xy((x-ddx,y-ddy))
+            c.set_xy((x-ddx, y-ddy))
             c.set_width(ddx)
             c.set_height(ddy)
         
@@ -390,7 +390,7 @@ class Rectangle(Target):
         dy = round(ddy/2)
         
         for c in self.patches:
-            c.set_xy((x,y-ddy))
+            c.set_xy((x, y-ddy))
             c.set_width(ddx)
             c.set_height(ddy)
         
@@ -417,7 +417,7 @@ class Rectangle(Target):
         dy = round(ddy/2)
         
         for c in self.patches:
-            c.set_xy((x-ddx,y))
+            c.set_xy((x-ddx, y))
             c.set_width(ddx)
             c.set_height(ddy)
         
@@ -444,7 +444,7 @@ class Rectangle(Target):
         dy = round(ddy/2)
         
         for c in self.patches:
-            c.set_xy((x,y))
+            c.set_xy((x, y))
             c.set_width(ddx)
             c.set_height(ddy)
         
@@ -463,7 +463,7 @@ class Ellipse(Target):
         Data fields:
             pt_center, pt_radius1, pt_radius2: DraggablePoints
             patches: mpl.patches for patches
-            x,y: center coordinates
+            x, y: center coordinates
             r1, r2: radius
     """
     
@@ -486,15 +486,15 @@ class Ellipse(Target):
         self.patches = []
         
         # center
-        self.pt_center = DraggablePoint(self,self.update_center,
-                            setx=True,sety=True,color=self.color, marker='x')
+        self.pt_center = DraggablePoint(self, self.update_center, 
+                            setx=True, sety=True, color=self.color, marker='x')
         
         # radius
-        self.pt_radius1 = DraggablePoint(self,self.update_radius1,
-                            setx=True,sety=True,color=self.color, marker='o')
+        self.pt_radius1 = DraggablePoint(self, self.update_radius1, 
+                            setx=True, sety=True, color=self.color, marker='o')
         
-        self.pt_radius2 = DraggablePoint(self,self.update_radius2,
-                            setx=True,sety=True,color=self.color, marker='o')
+        self.pt_radius2 = DraggablePoint(self, self.update_radius2, 
+                            setx=True, sety=True, color=self.color, marker='o')
         
         self.points = [self.pt_center, self.pt_radius1, self.pt_radius2]
         self.update_popup_label()
@@ -506,14 +506,14 @@ class Ellipse(Target):
         super().draw(ax)
         
         # draw things
-        self.patches.append(patches.Ellipse((self.x,self.y),
+        self.patches.append(patches.Ellipse((self.x, self.y), 
                                      width=self.r1*2, 
-                                     height=self.r2*2,
-                                     angle=self.angle*180/np.pi,
+                                     height=self.r2*2, 
+                                     angle=self.angle*180/np.pi, 
                                      fill=False, 
-                                     facecolor='none',
-                                     lw=1,
-                                     ls='-',
+                                     facecolor='none', 
+                                     lw=1, 
+                                     ls='-', 
                                      edgecolor=self.color))
         ax.add_patch(self.patches[-1])
         self.pt_center.add_ax(ax, self.x, self.y)
@@ -540,7 +540,7 @@ class Ellipse(Target):
         self.pt_radius2.set_ydata(y+self.r2*np.sin(self.angle+np.pi/2))
         
         for c in self.patches:
-            c.set_center((x,y))
+            c.set_center((x, y))
         
         self.x = x
         self.y = y
@@ -644,9 +644,9 @@ class DraggablePoint:
             points: list of point objects, corresponding to the various axes 
                     the target is drawn in 
             updatefn: funtion which updates the line in the corpatchest way
-                updatefn(xdata,ydata)
-            x,y: initial point position
-            setx,sety: if true, allow setting this parameter
+                updatefn(xdata, ydata)
+            x, y: initial point position
+            setx, sety: if true, allow setting this parameter
             color: point color
         """
         self.parent = parent
@@ -691,7 +691,7 @@ class DraggablePoint:
         self.cidrelease = []
         self.cidmotion = []
         
-        for i,pt in enumerate(self.points):
+        for i, pt in enumerate(self.points):
             self.cidpress.append(pt.figure.canvas.mpl_connect('button_press_event', 
                                 partial(self.on_press, id=i)))
                                  
@@ -725,7 +725,7 @@ class DraggablePoint:
         if self.sety:   self.set_ydata(y)
 
         # update the line
-        self.updatefn(x,y)        
+        self.updatefn(x, y)        
 
     # ======================================================================= #
     def on_release(self, event):
@@ -737,7 +737,7 @@ class DraggablePoint:
     def disconnect(self):
         'disconnect all the stored connection ids'
         
-        for i,pt in enumerate(self.points):
+        for i, pt in enumerate(self.points):
             pt.figure.canvas.mpl_disconnect(self.cidpress[i])
             pt.figure.canvas.mpl_disconnect(self.cidrelease[i])
             pt.figure.canvas.mpl_disconnect(self.cidmotion[i])
@@ -762,7 +762,7 @@ class DraggablePoint:
         del_list = []
         
         # remove from draggable points
-        for i,line in enumerate(ax.lines):
+        for i, line in enumerate(ax.lines):
             for pt in self.points:
                 if line is pt:
                     del_list.append(i)

@@ -4,7 +4,7 @@
 
 import numpy as np
 
-def gaussian2D(x,y,x0,y0,sigmax,sigmay,amp,theta=0):
+def gaussian2D(x, y, x0, y0, sigmax, sigmay, amp, theta=0):
     """Gaussian in 2D - from wikipedia"""
     
     ct2 = np.cos(theta)**2

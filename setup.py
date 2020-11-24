@@ -23,5 +23,6 @@ setuptools.setup(
     install_requires=['numpy>=1.19','matplotlib>=3.2.2','pandas>=1.0.5',
                       'scipy>=1.5.1','scikit-image>=0.17.2','astropy>=3.2.1'],
     package_data={'': ['./images']},
+    entry_points={'console_scripts':['bccd = bccd:main']},
     include_package_data=True,
 )

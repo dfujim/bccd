@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="bccd",
-    version="2.6.2",
+    version="2.7.0",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
-    description="BNMR/BNQR Beamspot Image Viewer and Analysis",
+    description="B-NMR/B-NQR Beamspot Image Viewer and Analysis",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/dfujim/bccd",

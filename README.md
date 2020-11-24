@@ -3,7 +3,7 @@
 ## Installation and Running the GUI
 
 * Install with `pip3 install --user bccd` from [pypi](https://pypi.org/project/bccd/). 
-* Run with `python3 -m bccd`. You may want to create an alias for this command. 
+* Run with `bccd`.
 
 Note that `bccd` uses `rsync` to copy all files from the machines which operate the cameras. These machines are password protected and the passwords must be entered on every use, unless you give your public key to these devices. To do that, do:
 

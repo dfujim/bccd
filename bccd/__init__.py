@@ -1,7 +1,7 @@
 import os 
 
 __all__ = ['gui','backend']
-__version__ = '2.7.0'
+__version__ = '2.7.1'
 __author__ = 'Derek Fujimoto'
 
 from bccd.backend.fits import fits

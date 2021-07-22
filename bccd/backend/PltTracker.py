@@ -268,7 +268,7 @@ class PltTracker(object):
         fig.canvas.user_active = fig.canvas.mpl_connect('button_press_event', self._update_active_id)
         
         # set window name 
-        fig.canvas.set_window_title('Figure %d' % (fig.number))
+        fig.canvas.manager.set_window_title('Figure %d' % (fig.number))
         
         # update lists
         self.plots.append(fig.number)

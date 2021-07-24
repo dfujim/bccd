@@ -36,6 +36,7 @@ class bccd(object):
         Data Fields:
        
             draw_new_target: BooleanVar, if true, draw new also draws targets
+            draw_title: BooleanVar, if true, add title to figures
             mainframe: frame for root
             notebook: notebook for adding files
             sync: BooleanVar, if true, sync data with remote servers
@@ -173,6 +174,13 @@ class bccd(object):
         
         menu_file.add_command(label='Load From Yaml', command=self.load)
         menu_file.add_command(label='Show keyboard shortcuts', command=self.show_keys)
+        
+        # titles
+        self.draw_title = BooleanVar()
+        self.draw_title.set(True)
+        menu_file.add_checkbutton(label="Include figure titles", \
+                variable=self.draw_title, selectcolor=colors.selected)
+        
         menu_file.add_command(label='Close All Figures', command=self.close_all)
         menu_file.add_command(label='Exit', command=sys.exit)
         menubar.add_cascade(menu=menu_file, label='File')

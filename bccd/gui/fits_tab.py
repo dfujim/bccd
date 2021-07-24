@@ -267,12 +267,13 @@ class fits_tab(object):
         self.remove_title()
     
         # set title
-        ax = self.plt.gca()
-        new_line = os.path.split(self.img.filename)[-1]
-        title = ax.get_title()
-        title = new_line + "\n" + title
-        title = title.strip()
-        ax.set_title(title, fontsize='x-small')
+        if self.bccd.draw_title.get():
+            ax = self.plt.gca()
+            new_line = os.path.split(self.img.filename)[-1]
+            title = ax.get_title()
+            title = new_line + "\n" + title
+            title = title.strip()
+            ax.set_title(title, fontsize='x-small')
         
         self.plt.tight_layout()
         

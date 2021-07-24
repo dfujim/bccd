@@ -262,7 +262,20 @@ class fits_tab(object):
         
         # draw
         fn(**options)
+        
+        # remove title if exists
+        self.remove_title()
     
+        # set title
+        ax = self.plt.gca()
+        new_line = os.path.split(self.img.filename)[-1]
+        title = ax.get_title()
+        title = new_line + "\n" + title
+        title = title.strip()
+        ax.set_title(title, fontsize='x-small')
+        
+        self.plt.tight_layout()
+        
     # ======================================================================= #
     def draw_new(self):
         """
@@ -393,7 +406,27 @@ class fits_tab(object):
             Remove image from the active figure
         """
         self.plt._remove_drawn_object(self.plt.gca(), self.filename)
-    
+        self.remove_title()
+        
+    # ======================================================================= #
+    def remove_title(self):
+        """
+            Remove title from list in active figure
+        """
+        
+        # get title from figure
+        ax = self.plt.gca()
+        title = ax.get_title()
+        title_list = title.split('\n')
+        
+        # remove title
+        rm_line = os.path.split(self.img.filename)[-1]
+        title = [t for t in title_list if t != rm_line]
+        
+        # reset title lines
+        title = '\n'.join(title)
+        ax.set_title(title, fontsize='x-small')
+        
     # ======================================================================= #
     def reset_black(self):
         """

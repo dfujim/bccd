@@ -470,7 +470,10 @@ class bccd(object):
             
             # set tab black
             tab.entry_black.delete(0, END)
-            tab.entry_black.insert(0, str(val['black']))
+            tab.entry_black.insert(0, str(val['black']/1e4))
+            
+            tab.entry_white.delete(0, END)
+            tab.entry_white.insert(0, str(val['white']/1e4))
             
             # set tab color
             if val['cmap'][-1] == 'r':    

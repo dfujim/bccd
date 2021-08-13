@@ -213,6 +213,7 @@ class fits(object):
         self.plt.imshow(id=self.filename, X=data, alpha=alpha, cmap=cmap, 
                         info={  'style':'Greyscale', 
                                 'black':self.black, 
+                                'white':self.white, 
                                 'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
                             }, 
@@ -268,6 +269,7 @@ class fits(object):
         self.plt.contour(self.filename, X, Y, data, levels=nlevels, cmap=cmap, alpha=alpha, 
                          info={ 'style':'Contours', 
                                 'black':self.black, 
+                                'white':self.white, 
                                 'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
                             }, 
@@ -300,6 +302,7 @@ class fits(object):
         self.plt.imshow(self.filename, edges, alpha=alpha, cmap=cmap, 
                         info={  'style':'Edges', 
                                 'black':self.black, 
+                                'white':self.white, 
                                 'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
                             }, 
@@ -328,6 +331,7 @@ class fits(object):
                         cmap=cmap, 
                         info={  'style':'Gradient', 
                                 'black':self.black, 
+                                'white':self.white, 
                                 'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
                             }, 

@@ -24,6 +24,7 @@ class fits_tab(object):
             bccd: pointer to top level
             black: StringVar, black level
             entry_black: Entry widget for black value
+            entry_white: Entry widget for white value
             filename: name of .fits file
             id: id number for later deletion (key in bccd.tabs)
             input_names: dict, map input names to nice titles
@@ -36,6 +37,7 @@ class fits_tab(object):
             style: StringVar, drawing style
             styles: dict, map drawing style to draw function and input names
             tab_frame: tkk.Frame; top level frame for this tab
+            white: StringVar, white level
     """
     
     # (color, inverted)
@@ -119,7 +121,10 @@ class fits_tab(object):
         
         # variables
         self.black = StringVar()
-        self.black.set(str(img.black))
+        self.black.set(str(img.black/1e4))
+        
+        self.white = StringVar()
+        self.white.set(str(img.white/1e4))
         
         self.style = StringVar()
         
@@ -172,16 +177,28 @@ class fits_tab(object):
         self.combo_style.grid(column=1, row=r, sticky=W); r+=1
         
         # black level
-        label_black = ttk.Label(frame_column1, text='Black Value: ')
+        label_black = ttk.Label(frame_column1, text='Black (1E4): ')
         frame_black = ttk.Frame(frame_column1)
         self.entry_black = ttk.Entry(frame_black, textvariable=self.black, width=10)
         button_black = ttk.Button(frame_black, text='Reset', width=8, 
                                   command=self.reset_black)
         
+        # white level
+        label_white = ttk.Label(frame_column1, text='White (1E4): ')
+        frame_white = ttk.Frame(frame_column1)
+        self.entry_white = ttk.Entry(frame_white, textvariable=self.white, width=10)
+        button_white = ttk.Button(frame_white, text='Reset', width=8, 
+                                  command=self.reset_white)
+        
         label_black.grid(column=0, row=r, sticky=W)
         frame_black.grid(column=1, row=r, sticky=W); r+=1
         self.entry_black.grid(column=0, row=0, sticky=W)
         button_black.grid(column=1, row=0, sticky=W, padx=2)
+        
+        label_white.grid(column=0, row=r, sticky=W)
+        frame_white.grid(column=1, row=r, sticky=W); r+=1
+        self.entry_white.grid(column=0, row=0, sticky=W)
+        button_white.grid(column=1, row=0, sticky=W, padx=2)
         
         # Inputs for draw style
         self.combo_style.bind("<<ComboboxSelected>>", 
@@ -247,7 +264,8 @@ class fits_tab(object):
         fn = self.styles[style][0]
         
         # set black level 
-        self.img.set_black(float(self.black.get()))
+        self.img.set_black(float(self.black.get())*1e4)
+        self.img.set_white(float(self.white.get())*1e4)
         
         # get inputs
         options = {}
@@ -433,10 +451,20 @@ class fits_tab(object):
         """
             Reset black to header value
         """
-        black = self.img.header['BZERO']
+        black = self.img.header['BZERO']/1e4
         self.entry_black.delete(0, END)
         self.entry_black.insert(0, str(black))
         self.black.set(str(black))
+        
+    # ======================================================================= #
+    def reset_white(self):
+        """
+            Reset white to inf
+        """
+        white = np.inf
+        self.entry_white.delete(0, END)
+        self.entry_white.insert(0, str(white))
+        self.white.set(str(white))
         
     # ======================================================================= #
     def set_imap(self, *args):

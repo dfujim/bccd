@@ -62,7 +62,7 @@ class fits(object):
             https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
     """
     show_options = {'origin':'lower', 
-                    'interpolation':'nearest'}
+                    'interpolation':'bicubic'}
     
     # ======================================================================= #
     def __init__(self, filename, plt=None, rescale_pixels=True):
@@ -188,11 +188,12 @@ class fits(object):
         return (cx, cy, radii)
     
     # ======================================================================= #
-    def draw(self, black=None, alpha=1, cmap='Greys', imap=True):
+    def draw(self, black=None, white=None, alpha=1, cmap='Greys', imap=True):
         """
             Draw fits file to matplotlib figure
             
             black:      set black level
+            black:      set white level
             alpha:      draw transparency
             cmap:       colormap
             imap:       invert the colour map
@@ -201,6 +202,8 @@ class fits(object):
         # get raw data
         if black is not None:
             self.set_black(black)
+        if white is not None:
+            self.set_white(white)
         data = self.data
         
         # color map 
@@ -579,8 +582,11 @@ class fits(object):
         data = fid.data
 
         # fix bad pixels: set to max
-        data[data<self.header['BZERO']] = np.max(data)
+        # ~ data[data<self.header['BZERO']] = np.max(data)
+        data = data.astype(np.float64)
+        data[data<self.header['BZERO']] += np.max(data) + 1
         self.black = self.header['BZERO']
+        self.white = np.inf
         
         # rescale image to correct pixel size asymmetry
         if rescale_pixels:
@@ -616,6 +622,21 @@ class fits(object):
         self.set_mask(self.mask)
         
     # ======================================================================= #
+    def set_white(self, white):
+        """
+            Clean, remove largest values
+            
+            white:  value to set to white, all pixels of higher value lowered to 
+                    this level
+        """
+        
+        # set the black input
+        self.white = white
+        
+        # apply black input and mask settings
+        self.set_mask(self.mask)
+        
+    # ======================================================================= #
     def set_mask(self, mask):
         """
             Mask image data
@@ -625,9 +646,10 @@ class fits(object):
         # set the mask input
         self.mask = mask
         
-        # reset blacklevel
+        # reset black and white
         data = np.copy(self.data_original)
         data[data<self.black] = self.black
+        data[data>self.white] = self.white
         
         # masking
         if mask is not None:     

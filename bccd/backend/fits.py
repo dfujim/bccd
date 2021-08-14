@@ -62,7 +62,7 @@ class fits(object):
             https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
     """
     show_options = {'origin':'lower', 
-                    'interpolation':'bicubic'}
+                    'interpolation':'nearest'}
     
     # ======================================================================= #
     def __init__(self, filename, plt=None, rescale_pixels=True):
@@ -108,9 +108,9 @@ class fits(object):
         # draw
         if draw:
             self.plt.figure()
-            self.plt.imshow(data, alpha=1, cmap='Greys_r', **self.show_options)
+            self.plt.imshow(X=data, alpha=1, cmap='Greys_r', **self.show_options)
             edges = np.ma.masked_where(~edges, edges.astype(int))
-            self.plt.imshow(edges, alpha=1, cmap='Reds_r', **self.show_options)
+            self.plt.imshow(X=edges, alpha=1, cmap='Reds_r', **self.show_options)
             
             for line in lines:
                 self.plt.plot(*tuple(np.array(line).T))
@@ -175,9 +175,12 @@ class fits(object):
         
         # draw
         if draw:
+            
             self.plt.imshow(self.filename, data, alpha=1, cmap='Greys_r', **self.show_options)
             edges = np.ma.masked_where(~edges, edges.astype(int))
-            self.plt.imshow(self.filename+'edges', edges, alpha=1, cmap='Reds_r', **self.show_options)
+            
+            self.plt.imshow(self.filename+'edges', edges, alpha=1, cmap='Reds_r', 
+                            **self.show_options)
             
             for center_y, center_x, radius in zip(cy, cx, radii):
                 circle = Circle((center_x, center_y), radius, 
@@ -209,14 +212,14 @@ class fits(object):
         # color map 
         if imap: cmap+='_r'
         
-        # draw
-        self.plt.imshow(id=self.filename, X=data, alpha=alpha, cmap=cmap, 
-                        info={  'style':'Greyscale', 
+        # draw 
+        self.plt.imshow(self.filename, data, alpha=alpha, cmap=cmap,
+                        info = {'style':'Greyscale', 
                                 'black':self.black, 
                                 'white':self.white, 
                                 'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
-                            }, 
+                               },
                         **self.show_options)
     
     # ======================================================================= #    
@@ -266,13 +269,13 @@ class fits(object):
         ax = self.plt.gca()
         
         options = {k:val for k, val in self.show_options.items() if k != "interpolation"}
-        self.plt.contour(self.filename, X, Y, data, levels=nlevels, cmap=cmap, alpha=alpha, 
-                         info={ 'style':'Contours', 
+        self.plt.contour(self.filename, X, Y, data, levels=nlevels, cmap=cmap, alpha=alpha,  
+                        info = {'style':'Contours', 
                                 'black':self.black, 
                                 'white':self.white, 
                                 'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
-                            }, 
+                               },
                          **options)
     
     # ======================================================================= #
@@ -299,13 +302,14 @@ class fits(object):
         
         # draw
         edges = np.ma.masked_where(~edges, edges.astype(int))
-        self.plt.imshow(self.filename, edges, alpha=alpha, cmap=cmap, 
-                        info={  'style':'Edges', 
+        
+        self.plt.imshow(filename, edges, alpha=alpha, cmap=cmap, 
+                        info = {'style':'Edges', 
                                 'black':self.black, 
                                 'white':self.white, 
                                 'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
-                            }, 
+                               }, 
                         **self.show_options)
         
     # ======================================================================= #
@@ -325,18 +329,18 @@ class fits(object):
         data = np.copy(self.data)
         sbl = filters.sobel(data)
         sbl[self.data.mask]=0
-        self.plt.imshow(self.filename, 
+        
+        self.plt.imshow(self.filename,
                         sbl, 
                         alpha=alpha, 
                         cmap=cmap, 
-                        info={  'style':'Gradient', 
+                        info = {'style':'Gradient', 
                                 'black':self.black, 
                                 'white':self.white, 
                                 'exposure_s':self.header['EXPOSURE'], 
                                 'date':self.datetime
-                            }, 
+                               }, 
                         **self.show_options)
-    
         return sbl
         
     # ======================================================================= #
@@ -380,11 +384,12 @@ class fits(object):
         return (par, cov)
     
     # ======================================================================= #    
-    def fit_gaussian2D(self, draw=True, **fitargs):
+    def fit_gaussian2D(self, draw=True, get_p0_from_center=False, **fitargs):
         """
             Fit 2D gaussian to image
             
-            draw:       draw the output
+            draw:               draw the output
+            get_p0_from_center: use get_center to estimate some of the p0 parameters
         """
         
         # get data 
@@ -393,16 +398,23 @@ class fits(object):
         # estimate moments https://scipy-cookbook.readthedocs.io/items/FittingData.html
         total = data.sum()
         X, Y = np.indices(data.shape)
-        x = (X*data).sum()/total
-        y = (Y*data).sum()/total
-        col = data[:, int(y)]
-        width_x = np.sqrt(np.abs((np.arange(col.size)-y)**2*col).sum()/col.sum())
-        row = data[int(x), :]
-        width_y = np.sqrt(np.abs((np.arange(row.size)-x)**2*row).sum()/row.sum()) 
+        
+        if get_p0_from_center:
+            x, y, width_x, width_y = self.get_center(draw = False)
+            
+        else:
+            x = (X*data).sum()/total
+            y = (Y*data).sum()/total
+            col = data[:, int(y)]
+            width_x = np.sqrt(np.abs((np.arange(col.size)-y)**2*col).sum()/col.sum())
+            row = data[int(x), :]
+            width_y = np.sqrt(np.abs((np.arange(row.size)-x)**2*row).sum()/row.sum()) 
         
         # fit 
-        p0 = (x, y, width_x, width_y, 1, 0)
-        par, cov = self.fit2D(gaussian2D, p0=p0)
+        p0 = (x, y, width_x, width_y, 1, 0)        
+        par, cov = self.fit2D(gaussian2D, p0=p0, 
+                                bounds=[[0, 0, 0, 0, 0, -np.inf], \
+                                        [500, 500, 500, 500, np.inf, np.inf]])
         std = np.diag(cov)**0.5
         
         # make output
@@ -451,14 +463,23 @@ class fits(object):
         sumx /= normx
         sumy /= normy
         
-        # fit with gaussian
+        # define gaussian
         gaus = lambda x, x0, sig, amp, base : amp*np.exp(-((x-x0)/(2*sig))**2)+base
         
-        parx, cov = curve_fit(gaus, np.arange(len(sumx)), sumx, p0=(180, 10, 1, 0), 
+        # get initial parameters
+        x = np.arange(len(sumx))
+        amp1 = np.max(sumx)
+        x01 = np.where(sumx==amp1)[0][0]
+        
+        y = np.arange(len(sumy))
+        amp2 = np.max(sumy)
+        x02 = np.where(sumy==amp2)[0][0]
+        
+        parx, cov = curve_fit(gaus, x, sumx, p0=(x01, 10, amp1, 0), 
                                 bounds=((0, 0, 0, -np.inf), np.inf))
         stdx = np.diag(cov)**0.5
         
-        pary, cov = curve_fit(gaus, np.arange(len(sumy)), sumy, p0=(260, 10, 1, 0), 
+        pary, cov = curve_fit(gaus, np.arange(len(sumy)), sumy, p0=(x02, 10, amp2, 0), 
                                 bounds=((0, 0, 0, -np.inf), np.inf))
         stdy = np.diag(cov)**0.5               
         
@@ -474,6 +495,7 @@ class fits(object):
             self.plt.legend()
             
             self.plt.figure()
+                
             self.plt.imshow(self.filename, data, cmap='Greys_r', **self.show_options)
             self.plt.errorbar(parx[0], pary[0], xerr=2*parx[1], yerr=2*pary[1], fmt='o', 
                           fillstyle='none', markersize=9)

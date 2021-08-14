@@ -38,7 +38,7 @@ draw_sobel(alpha=1,cmap='Greys',imap=False)
 
 # fitting
 fit2D(function,**fitargs)
-fit_gaussian2D(draw=True,**fitargs)
+fit_gaussian2D(draw=True, get_p0_from_center=False, **fitargs)
 
 # processing
 get_center(draw=True)

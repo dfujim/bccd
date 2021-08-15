@@ -552,7 +552,7 @@ class fits(object):
         return (cx, cy)
 
     # ======================================================================= #
-    def get_gaussian2D_overlap(self, ylo, yhi, xlo, xhi):
+    def get_gaussian2D_overlap(self, ylo, yhi, xlo, xhi, par=None):
         """
             Get integral of gaussian2D PDF within some interval, normalized to the 
             area such that the returned overlap is the event probability within the 
@@ -568,12 +568,17 @@ class fits(object):
                     int_y int_x G(x, y) dx dy
             
             
+            par:    parameter list x0, y0, sx, sy, amp, theta. If none, get from self
+            
             returns overlap as given by dblquad
         """
         
         # get fitting results 
-        x0, y0, sx, sy, amp, theta = self.result_gaussian2D['result']
-        
+        if par is None:
+            x0, y0, sx, sy, amp, theta = self.result_gaussian2D['result']
+        else:
+            x0, y0, sx, sy, amp, theta = par
+            
         # get normalized volume
         # https://en.wikipedia.org/wiki/Gaussian_function
         # ~ a = 0.5*(np.cos(theta)/sx)**2 + 0.5*(np.sin(theta)/sy)**2

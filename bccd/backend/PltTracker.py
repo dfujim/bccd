@@ -145,6 +145,13 @@ class PltTracker(object):
         return self._decorator(plt.axvline, *args, id=id, unique=unique, **kwargs)
         
     # ======================================================================= #
+    def cla(self):
+        """Clear the axes for a given style"""
+        out = self._decorator(plt.cla)
+        ax = plt.gca()
+        ax.draw_objs = {}
+        
+    # ======================================================================= #
     def clf(self):
         """Clear the figure for a given style"""
         out = self._decorator(plt.clf)

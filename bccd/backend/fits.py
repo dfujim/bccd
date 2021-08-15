@@ -33,6 +33,7 @@ class fits(object):
         Data Fields: 
         
             black:          float, pixel value corresponding to black (zero)
+            chi2:           float, chisquared value from 2D fit
             data:           2D numpy array, pixel values
             data_original:  numpy array, pixel values
             datetime:       datetime object with the time the image was taken, 
@@ -344,12 +345,12 @@ class fits(object):
         return sbl
         
     # ======================================================================= #
-    def fit2D(self, function, **fitargs):
+    def fit2D(self, function, pix_error=1, **fitargs):
         """
             Fit general function to fits file
             
             function:   python function handle
-            
+            pix_error:  estimation for the error in the pixel values
             returns curve_fit output
         """
         
@@ -381,10 +382,14 @@ class fits(object):
         par, cov = curve_fit(fitfn, x, flat, **fitargs)
         
         self.result_fit2D = (par, cov)
+        
+        # get chisquared
+        self.chi2 = np.sum(np.square( (flat-fitfn(x, *par))/pix_error )) / (len(flat)-npar)
+        
         return (par, cov)
     
     # ======================================================================= #    
-    def fit_gaussian2D(self, draw=True, get_p0_from_center=False, **fitargs):
+    def fit_gaussian2D(self, draw=True, get_p0_from_center=False, pix_error=1, **fitargs):
         """
             Fit 2D gaussian to image
             
@@ -423,7 +428,6 @@ class fits(object):
         
         # draw output
         if draw:
-            self.plt.figure()    
             self.draw()
             contours = self.draw_2Dfit(gaussian2D, *par[:4], 1, 0, **fitargs)
             

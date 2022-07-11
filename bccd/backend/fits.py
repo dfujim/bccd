@@ -631,7 +631,7 @@ class fits(object):
             if aspect > 1:      resc = (aspect, 1)
             else:               resc = (1, 1/aspect)
             
-            data = rescale(data, resc, order=3, channel_axis=False, preserve_range=True) 
+            data = rescale(data, resc, order=3, preserve_range=True) 
         
         self.data = data
         

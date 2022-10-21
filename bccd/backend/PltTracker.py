@@ -6,6 +6,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import yaml
 import os
+from bccd.backend.Target import Circle, Square, Rectangle, Ellipse
 
 # =========================================================================== #
 class PltTracker(object):
@@ -15,13 +16,16 @@ class PltTracker(object):
     """
     
     # ======================================================================= #
-    def __init__(self):
+    def __init__(self, bccd=None):
         
         # track which plots exist
         self.plots = []
         
         # track the active plot 
         self.active = 0
+        
+        # track parent 
+        self.bccd = bccd
     
     # ======================================================================= #
     def _close_figure(self, event):
@@ -413,6 +417,48 @@ class PltTracker(object):
                     draw[1]['id'] = draw[1]['id'].split('.bccd/')[1]
                 
                 objs.append(draw[1])
+        
+            # check for parent - write targets
+            if self.bccd is not None: 
+                
+                # iterate targets
+                for i, target_pop in enumerate(self.bccd.targets):
+                    
+                    target = target_pop.target
+                    
+                    for ax_target in target.ax_list:
+                        
+                        # is target drawn on these axes? 
+                        if ax_target == self.gca():
+                            
+                            # get target info
+                            target_type = None
+                            target_points = {}
+                            if type(target) == Circle:      
+                                target_type = 'circle'
+                                for key in ('x', 'y', 'r'):
+                                    target_points[key] = getattr(target, key)
+                                
+                            elif type(target) == Square:    
+                                target_type = 'square'
+                                for key in ('x', 'y', 'side'):
+                                    target_points[key] = getattr(target, key)
+                                                        
+                            elif type(target) == Rectangle: 
+                                target_type = 'rectangle'
+                                for key in ('x', 'y', 'dx', 'dy'):
+                                    target_points[key] = getattr(target, key)
+                                
+                            elif type(target) == Ellipse:   
+                                target_type = 'ellipse'
+                                for key in ('x', 'y', 'r1', 'r2', 'angle'):
+                                    target_points[key] = getattr(target, key)
+                                
+                            else: 
+                                raise RuntimeError('Unknown target shape')
+                    
+                    # add target data to objs
+                    objs[-1][f'target {i}'] = {'shape':target_type, **target_points}
         
         # write text file with details
         yaml_file = os.path.splitext(filename)[0]+'.yaml'

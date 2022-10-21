@@ -62,7 +62,7 @@ class bccd(object):
         """"""
         
         # plot tracker
-        self.plt = PltTracker()
+        self.plt = PltTracker(bccd=self)
         
         # root 
         root = Tk()

@@ -437,22 +437,22 @@ class PltTracker(object):
                             if type(target) == Circle:      
                                 target_type = 'circle'
                                 for key in ('x', 'y', 'r'):
-                                    target_points[key] = getattr(target, key)
+                                    target_points[key] = float(getattr(target, key))
                                 
                             elif type(target) == Square:    
                                 target_type = 'square'
                                 for key in ('x', 'y', 'side'):
-                                    target_points[key] = getattr(target, key)
+                                    target_points[key] = float(getattr(target, key))
                                                         
                             elif type(target) == Rectangle: 
                                 target_type = 'rectangle'
                                 for key in ('x', 'y', 'dx', 'dy'):
-                                    target_points[key] = getattr(target, key)
+                                    target_points[key] = float(getattr(target, key))
                                 
                             elif type(target) == Ellipse:   
                                 target_type = 'ellipse'
                                 for key in ('x', 'y', 'r1', 'r2', 'angle'):
-                                    target_points[key] = getattr(target, key)
+                                    target_points[key] = float(getattr(target, key))
                                 
                             else: 
                                 raise RuntimeError('Unknown target shape')

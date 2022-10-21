@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="bccd",
-    version="2.8.7",
+    version="2.8.8",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
     description="B-NMR/B-NQR Beamspot Image Viewer and Analysis",

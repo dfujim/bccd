@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="bccd",
-    version="2.8.8",
+    version="2.8.9",
     author="Derek Fujimoto",
     author_email="fujimoto@phas.ubc.ca",
     description="B-NMR/B-NQR Beamspot Image Viewer and Analysis",
@@ -21,7 +21,7 @@ setuptools.setup(
         "Operating System :: POSIX :: Linux",
     ],
     install_requires=['numpy>=1.19','matplotlib>=3.2.2','pandas>=1.0.5',
-                      'scipy>=1.5.1','scikit-image>=0.17.2','astropy>=3.2.1'],
+                      'scipy>=1.5.1','scikit-image>=0.17.2','astropy>=3.2.1','PyYaml>=6.0'],
     package_data={'': ['./images']},
     entry_points={'console_scripts':['bccd = bccd:main']},
     include_package_data=True,

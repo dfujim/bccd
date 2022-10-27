@@ -184,6 +184,8 @@ class Circle(Target):
             # grid
             lab.grid(column=0, row=i, padx=5, pady=5)
             entry.grid(column=1, row=i, padx=5, pady=5)
+            
+            self.result_entry.append(entry)
         
         # place circle at the center of the window
         self.patches = []
@@ -318,6 +320,8 @@ class Square(Target):
             # grid
             lab.grid(column=0, row=i, padx=5, pady=5)
             entry.grid(column=1, row=i, padx=5, pady=5)
+            
+            self.result_entry.append(entry)
         
         # place circle at the center of the window
         self.patches = []
@@ -461,6 +465,8 @@ class Rectangle(Target):
             # grid
             lab.grid(column=0, row=i, padx=5, pady=5)
             entry.grid(column=1, row=i, padx=5, pady=5)
+            
+            self.result_entry.append(entry)
         
         # place circle at the center of the window
         self.patches = []
@@ -694,6 +700,8 @@ class Ellipse(Target):
             # grid
             lab.grid(column=0, row=i, padx=5, pady=5, sticky='e')
             entry.grid(column=1, row=i, padx=5, pady=5)
+            
+            self.result_entry.append(entry)
         
         # place circle at the center of the window
         self.patches = []

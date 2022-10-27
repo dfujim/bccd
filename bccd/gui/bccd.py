@@ -105,8 +105,12 @@ class bccd(object):
         root.option_add("*Spinbox*Foreground",  colors.foreground)
         root.option_add("*Listbox*Foreground",  colors.foreground)
         root.option_add("*Text*Foreground",     colors.foreground)
-        
         root.option_add("*Scrollbar.Background", colors.foreground)
+        
+        root.option_add("*Entry.Foreground",    colors.insertbackground)
+        root.option_add("*Entry.Background",    colors.fieldbackground)
+        root.option_add("*Entry.HighlightBackground",colors.background)
+        root.option_add("*Entry.DisabledBackground",colors.entry_disabled)
         
         ttk_style = ttk.Style()
         ttk_style.configure('.', font=colors.font, 
@@ -116,7 +120,7 @@ class bccd(object):
                                    borderwidth=2)
                                    
         ttk_style.map('.', background=[('disabled', colors.background)], 
-                           fieldbackground=[('selected', colors.selected)])
+                           fieldbackground=[('selected', colors.fieldbackground)])
                                          
         ttk_style.configure('TNotebook.Tab', padding=[5, 2])
         ttk_style.configure("TNotebook.Tab", background=colors.background)

@@ -169,8 +169,12 @@ class popup_target(object):
         try:
             if self.interactive.get():
                 self.target.enable_drag_points()
+                for entry in self.target.result_entry:
+                    entry['state'] = 'normal'
             else:
                 self.target.disable_drag_points()
+                for entry in self.target.result_entry:
+                    entry['state'] = 'readonly'
         except AttributeError:
             self.interactive.set(not self.interactive.get())
         

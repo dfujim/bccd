@@ -5,6 +5,8 @@
 import matplotlib.patches as patches
 from functools import partial
 import numpy as np
+import tkinter as tk
+from tkinter import ttk
 
 class Target(object):
     
@@ -16,21 +18,22 @@ class Target(object):
             bccd: bccd object
             color: string, maplotlib color name for coloring everything
             figures: list of figures to update
-            label: ttk label object to update text on properties
+            result_frame: ttk Frame object to update text on properties
             popup_target: popup_target object
             points: list of all DraggablePoints
-            
     """
 
     # ======================================================================= #
-    def __init__(self, popup_target, color, label):
+    def __init__(self, popup_target, color, result_frame):
         
         self.bccd = popup_target.bccd 
         self.popup_target = popup_target 
         self.ax_list = []
         self.color = color
-        self.label = label
+        self.result_frame = result_frame
         self.points = []
+        self.result_entry = []
+        self.pt_center = None
         
     # ======================================================================= #
     def disable_drag_points(self):
@@ -101,7 +104,42 @@ class Target(object):
         """
         for ax in self.ax_list.copy():
             self.remove(ax=ax)
+     
+    # ======================================================================= #
+    def update_center(self, x, y, do_set=True):
+        pass
+        
+    # ======================================================================= #
+    def update_center_x(self, _):
+        """
+            Update circle and draggable point based on typed input
+        """
+        
+        try:
+            x = float(self.x.get())
+            y = float(self.y.get())
+        except ValueError:
+            return
+        
+        # update position
+        self.pt_center.set_xdata(x)
+        self.update_center(x, y, False)
+   
+    # ======================================================================= #
+    def update_center_y(self, _):
+        """
+            Update circle and draggable point based on typed input
+        """
+        try:
+            x = float(self.x.get())
+            y = float(self.y.get())
+        except ValueError:
+            return
             
+        # update position
+        self.pt_center.set_ydata(y)
+        self.update_center(x, y, False)
+    
 class Circle(Target):
     """
         Drawing circle target shapes on lots of figures
@@ -114,14 +152,38 @@ class Circle(Target):
     """
 
     # ======================================================================= #
-    def __init__(self, popup_target, color, label, x, y, r):
+    def __init__(self, popup_target, color, result_frame, x, y, r):
         
-        super().__init__(popup_target, color, label)
+        super().__init__(popup_target, color, result_frame)
         
         # save circle position
-        self.x = x
-        self.y = y
-        self.r = r
+        self.x = tk.StringVar()
+        self.y = tk.StringVar()
+        self.r = tk.StringVar()
+        
+        self.x.set(x)
+        self.y.set(y)
+        self.r.set(r)
+        
+        fields = [self.x, self.y, self.r]
+        labels = ['x0', 'y0', 'r']
+        update_fns = [self.update_center_x, self.update_center_y, self.update_radius_pt]
+        
+        # make result lines
+        for i in range(len(labels)):
+            
+            # make fields
+            lab = ttk.Label(self.result_frame, text=f'{labels[i]} = ')
+            entry = ttk.Entry(self.result_frame, 
+                            textvariable=fields[i], 
+                            width=10, 
+                            justify='right')
+            
+            entry.bind('<KeyRelease>', update_fns[i])
+                            
+            # grid
+            lab.grid(column=0, row=i, padx=5, pady=5)
+            entry.grid(column=1, row=i, padx=5, pady=5)
         
         # place circle at the center of the window
         self.patches = []
@@ -135,58 +197,81 @@ class Circle(Target):
                             setx=True, sety=False, color=self.color, marker='o')
         
         self.points = [self.pt_center, self.pt_radius]
-        self.update_popup_label()
         
     # ======================================================================= #
     def draw(self, ax):
         """Add the target to the current axes"""
         
         super().draw(ax)
+
+        x = float(self.x.get())
+        y = float(self.y.get())
+        r = float(self.r.get())
         
         # draw things
-        self.patches.append(patches.Circle((self.x, self.y), self.r, 
+        self.patches.append(patches.Circle((x, y), r, 
                                      fill=False, 
                                      facecolor='none', 
                                      lw=1, 
                                      ls='-', 
                                      edgecolor=self.color))
         ax.add_patch(self.patches[-1])
-        self.pt_center.add_ax(ax, self.x, self.y)
-        self.pt_radius.add_ax(ax, self.x+self.r, self.y, )
+        self.pt_center.add_ax(ax, x, y)
+        self.pt_radius.add_ax(ax, x+r, y, )
 
     # ======================================================================= #
-    def update_popup_label(self):
-        """Update popup window label with info on target"""
-        
-        self.label.config(text='x0 = %.3f\ny0 = %.3f\nr = %.3f' % (self.x, self.y, self.r))
-        
-    # ======================================================================= #
-    def update_center(self, x, y):
+    def update_center(self, x, y, do_set=True):
         """
             Update circle position based on DraggablePoint
         """
-        self.pt_radius.set_xdata(x+self.r)
+        
+        try:
+            r = float(self.r.get())
+        except ValueError:
+            return
+        
+        self.pt_radius.set_xdata(x+r)
         self.pt_radius.set_ydata(y)
         
         for c in self.patches:
             c.set_center((x, y))
         
-        self.x = x
-        self.y = y
-        self.update_popup_label()
-    
+        if do_set:
+            self.x.set(f'{x:.2f}')
+            self.y.set(f'{y:.2f}')
+            
     # ======================================================================= #
-    def update_radius(self, x, y):
+    def update_radius(self, x, y, do_set=True):
         """
             Update circle radius based on DraggablePoint
         """
 
-        self.r = abs(self.x-x)
+        try:
+            r = abs(float(self.x.get())-x)
+        except ValueError:
+            return
+        
+        if do_set:
+            self.r.set(f'{r:.2f}')
         
         for c in self.patches:
-            c.set_radius(self.r)
+            c.set_radius(r)
+    
+    # ======================================================================= #
+    def update_radius_pt(self, _):
+        """
+            Update circle and draggable point based on typed input
+        """
+        try:
+            r = float(self.r.get())
+            x = float(self.x.get())
+            y = float(self.y.get())
+        except ValueError:
+            return
             
-        self.update_popup_label()
+        # update position
+        self.pt_radius.set_xdata(x+r)
+        self.update_radius(x+r, y, False)
     
 class Square(Target):
     """
@@ -200,14 +285,39 @@ class Square(Target):
     """
 
     # ======================================================================= #
-    def __init__(self, popup_target, color, label, x, y, side):
+    def __init__(self, popup_target, color, result_frame, x, y, side):
         
-        super().__init__(popup_target, color, label)
+        super().__init__(popup_target, color, result_frame)
         
-        # save circle position
-        self.x = x
-        self.y = y
-        self.side = side
+        # save square position
+                # save circle position
+        self.x = tk.StringVar()
+        self.y = tk.StringVar()
+        self.side = tk.StringVar()
+        
+        self.x.set(x)
+        self.y.set(y)
+        self.side.set(side)
+        
+        fields = [self.x, self.y, self.side]
+        labels = ['x0', 'y0', 'side']
+        update_fns = [self.update_center_x, self.update_center_y, self.update_side_pt]
+        
+        # make result lines
+        for i in range(len(labels)):
+            
+            # make fields
+            lab = ttk.Label(self.result_frame, text=f'{labels[i]} = ')
+            entry = ttk.Entry(self.result_frame, 
+                            textvariable=fields[i], 
+                            width=10, 
+                            justify='right')
+            
+            entry.bind('<KeyRelease>', update_fns[i])
+                            
+            # grid
+            lab.grid(column=0, row=i, padx=5, pady=5)
+            entry.grid(column=1, row=i, padx=5, pady=5)
         
         # place circle at the center of the window
         self.patches = []
@@ -221,7 +331,6 @@ class Square(Target):
                             setx=True, sety=False, color=self.color, marker='s')
         
         self.points = [self.pt_center, self.pt_side]
-        self.update_popup_label()
         
     # ======================================================================= #
     def draw(self, ax):
@@ -229,55 +338,83 @@ class Square(Target):
         
         super().draw(ax)
         
+        try:
+            x = float(self.x.get())
+            y = float(self.y.get())
+            side = float(self.side.get())
+        except ValueError:
+            return
+            
         # draw things
-        self.patches.append(patches.Rectangle((self.x-self.side, self.y-self.side), 
-                                            width=self.side*2, 
-                                            height=self.side*2, 
+        self.patches.append(patches.Rectangle((x-side/2, y-side/2), 
+                                            width=side, 
+                                            height=side, 
                                             fill=False, 
                                             facecolor='none', 
                                             lw=1, 
                                             ls='-', 
                                             edgecolor=self.color))
         ax.add_patch(self.patches[-1])
-        self.pt_center.add_ax(ax, self.x, self.y)
-        self.pt_side.add_ax(ax, self.x+self.side, self.y)
-
+        self.pt_center.add_ax(ax, x, y)
+        self.pt_side.add_ax(ax, x+side/2, y)
+       
     # ======================================================================= #
-    def update_popup_label(self):
-        """Update popup window label with info on target"""
-        
-        self.label.config(text='x0 = %.3f\ny0 = %.3f\nside = %.3f' % (self.x, self.y, self.side*2))
-        
-    # ======================================================================= #
-    def update_center(self, x, y):
+    def update_center(self, x, y, do_set=True):
         """
             Update circle position based on DraggablePoint
         """
-        self.pt_side.set_xdata(x+self.side)
+        
+        try:
+            side = float(self.side.get())
+        except ValueError:
+            return
+        
+        self.pt_side.set_xdata(x+side/2)
         self.pt_side.set_ydata(y)
         
         for c in self.patches:
-            c.set_xy((x-self.side, y-self.side))
+            c.set_xy((x-side/2, y-side/2))
         
-        self.x = x
-        self.y = y
-        self.update_popup_label()
-    
+        if do_set:
+            self.x.set(f'{x:.2f}')
+            self.y.set(f'{y:.2f}')
+            
     # ======================================================================= #
-    def update_side(self, x, y):
+    def update_side(self, x, y, do_set=True):
         """
             Update circle radius based on DraggablePoint
         """
 
-        self.side = abs(self.x-x)
-        dx = self.side*2
-        
+        try:
+            dx = abs(float(self.x.get())-x)*2
+            x = float(self.x.get())
+            y = float(self.y.get())
+        except ValueError:
+            return
+            
         for c in self.patches:
-            c.set_xy((self.x-self.side, self.y-self.side))
+            c.set_xy((x-dx/2, y-dx/2))
             c.set_height(dx)
             c.set_width(dx)
+        
+        if do_set:
+            self.side.set(f'{dx:.2f}')
+        
+    # ======================================================================= #
+    def update_side_pt(self, _):
+        """
+            Update circle and draggable point based on typed input
+        """
+        try:
+            side = float(self.side.get())
+            x = float(self.x.get())
+            y = float(self.y.get())
+        except ValueError:
+            return
             
-        self.update_popup_label()
+        # update position
+        self.pt_side.set_xdata(x+side/2)
+        self.update_side(x+side/2, y, False)
         
 class Rectangle(Target):
     """
@@ -291,15 +428,39 @@ class Rectangle(Target):
     """
 
     # ======================================================================= #
-    def __init__(self, popup_target, color, label, x, y, side):
+    def __init__(self, popup_target, color, result_frame, x, y, side):
         
-        super().__init__(popup_target, color, label)
+        super().__init__(popup_target, color, result_frame)
         
-        # save circle position
-        self.x = x
-        self.y = y
-        self.dx = side
-        self.dy = side
+        # save rectangle position
+        self.x = tk.StringVar()
+        self.y = tk.StringVar()
+        self.dx = tk.StringVar()
+        self.dy = tk.StringVar()
+        
+        self.x.set(x)
+        self.y.set(y)
+        self.dx.set(side*2)
+        self.dy.set(side*2)
+        
+        fields = [self.x, self.y, self.dx, self.dy]
+        labels = ['x0', 'y0', 'side x', 'side y']
+        
+        # make result lines
+        for i in range(len(labels)):
+            
+            # make fields
+            lab = ttk.Label(self.result_frame, text=f'{labels[i]} = ')
+            entry = ttk.Entry(self.result_frame, 
+                            textvariable=fields[i], 
+                            width=10, 
+                            justify='right')
+            
+            entry.bind('<KeyRelease>', self.update_typed)
+                            
+            # grid
+            lab.grid(column=0, row=i, padx=5, pady=5)
+            entry.grid(column=1, row=i, padx=5, pady=5)
         
         # place circle at the center of the window
         self.patches = []
@@ -318,7 +479,6 @@ class Rectangle(Target):
                             setx=True, sety=True, color=self.color, marker='s')
         
         self.points = [self.pt_tl, self.pt_tr, self.pt_br, self.pt_bl]
-        self.update_popup_label()
         
     # ======================================================================= #
     def draw(self, ax):
@@ -326,33 +486,61 @@ class Rectangle(Target):
         
         super().draw(ax)
         
+        try:
+            x = float(self.x.get())
+            y = float(self.y.get())
+            dx = float(self.dx.get())/2
+            dy = float(self.dy.get())/2
+        except KeyError:
+            return
+        
         # draw things
-        self.patches.append(patches.Rectangle((self.x-self.dx, self.y-self.dy), 
-                                            width=self.dx*2, 
-                                            height=self.dy*2, 
+        self.patches.append(patches.Rectangle((x-dx, y-dy), 
+                                            width=dx*2, 
+                                            height=dy*2, 
                                             fill=False, 
                                             facecolor='none', 
                                             lw=1, 
                                             ls='-', 
                                             edgecolor=self.color))
         ax.add_patch(self.patches[-1])
-        self.pt_tr.add_ax(ax, self.x+self.dx, self.y+self.dy)
-        self.pt_tl.add_ax(ax, self.x-self.dx, self.y+self.dy)
-        self.pt_br.add_ax(ax, self.x+self.dx, self.y-self.dy)
-        self.pt_bl.add_ax(ax, self.x-self.dx, self.y-self.dy)
+        self.pt_tr.add_ax(ax, x+dx, y+dy)
+        self.pt_tl.add_ax(ax, x-dx, y+dy)
+        self.pt_br.add_ax(ax, x+dx, y-dy)
+        self.pt_bl.add_ax(ax, x-dx, y-dy)
         
     # ======================================================================= #
-    def update_popup_label(self):
-        """Update popup window label with info on target"""
+    def update_typed(self, _):
+        """
+            Update shape and draggable point based on typed input
+        """
         
-        self.label.config(text='x0 = %.3f\ny0 = %.3f\ndx = %.3f\ndy = %.3f' % \
-                (self.x, self.y, self.dx*2, self.dy*2))
+        try:
+            x = float(self.x.get())
+            y = float(self.y.get())
+            dx = float(self.dx.get())/2
+            dy = float(self.dy.get())/2
+        except KeyError:
+            return
+            
+        # update points
+        self.pt_tl.set_xdata(x-dx)
+        self.pt_bl.set_xdata(x-dx)
+        self.pt_tr.set_xdata(x+dx)
+        self.pt_br.set_xdata(x+dx)
+        
+        # update shape
+        self.update_tl(x-dx, y+dy, False)
+        self.update_tr(x+dx, y+dy, False)
+        self.update_bl(x-dx, y-dy, False)
+        self.update_br(x+dx, y-dy, False)
         
     # ======================================================================= #
-    def update_tr(self, x, y):
+    def update_tr(self, x, y, do_set=True):
         """
             Update top right position based on DraggablePoint
         """
+        
         self.pt_tl.set_ydata(y)
         self.pt_br.set_xdata(x)
         
@@ -367,16 +555,15 @@ class Rectangle(Target):
             c.set_width(ddx)
             c.set_height(ddy)
         
-        self.x = x-dx
-        self.y = y-dy
-        
-        self.dx = abs(dx)
-        self.dy = abs(dy)
-        
-        self.update_popup_label()
+        if do_set:
+            self.x.set(f'{x-dx:.2f}')
+            self.y.set(f'{y-dy:.2f}')
+            
+            self.dx.set(f'{abs(dx)*2:.2f}')
+            self.dy.set(f'{abs(dy)*3:.2f}')
     
     # ======================================================================= #
-    def update_tl(self, x, y):
+    def update_tl(self, x, y, do_set=True):
         """
             Update top left position based on DraggablePoint
         """
@@ -394,16 +581,15 @@ class Rectangle(Target):
             c.set_width(ddx)
             c.set_height(ddy)
         
-        self.x = x+dx
-        self.y = y-dy
-        
-        self.dx = abs(dx)
-        self.dy = abs(dy)
-        
-        self.update_popup_label()
+        if do_set:
+            self.x.set(f'{x+dx:.2f}')
+            self.y.set(f'{y-dy:.2f}')
+            
+            self.dx.set(f'{abs(dx)*2:.2f}')
+            self.dy.set(f'{abs(dy)*2:.2f}')
         
     # ======================================================================= #
-    def update_br(self, x, y):
+    def update_br(self, x, y, do_set=True):
         """
             Update bottom right position based on DraggablePoint
         """
@@ -421,16 +607,16 @@ class Rectangle(Target):
             c.set_width(ddx)
             c.set_height(ddy)
         
-        self.x = x-dx
-        self.y = y+dy
+        if do_set:
         
-        self.dx = abs(dx)
-        self.dy = abs(dy)
-        
-        self.update_popup_label()
-        
+            self.x.set(f'{x-dx:.2f}')
+            self.y.set(f'{y+dy:.2f}')
+            
+            self.dx.set(f'{abs(dx)*2:.2f}')
+            self.dy.set(f'{abs(dy)*2:.2f}')
+            
     # ======================================================================= #
-    def update_bl(self, x, y):
+    def update_bl(self, x, y, do_set=True):
         """
             Update bottom left position based on DraggablePoint
         """
@@ -448,13 +634,12 @@ class Rectangle(Target):
             c.set_width(ddx)
             c.set_height(ddy)
         
-        self.x = x+dx
-        self.y = y+dy
-        
-        self.dx = abs(dx)
-        self.dy = abs(dy)
-        
-        self.update_popup_label()
+        if do_set:
+            self.x.set(f'{x+dx:.2f}')
+            self.y.set(f'{y+dy:.2f}')
+            
+            self.dx.set(f'{abs(dx)*2:.2f}')
+            self.dy.set(f'{abs(dy)*2:.2f}')
                 
 class Ellipse(Target):
     """
@@ -471,16 +656,44 @@ class Ellipse(Target):
     rmin = 10
 
     # ======================================================================= #
-    def __init__(self, popup_target, color, label, x, y, r1, r2):
+    def __init__(self, popup_target, color, result_frame, x, y, r1, r2):
         
-        super().__init__(popup_target, color, label)
+        super().__init__(popup_target, color, result_frame)
         
         # save circle position
-        self.x = x
-        self.y = y
-        self.r1 = r1
-        self.r2 = r2
-        self.angle = 0
+        self.x = tk.StringVar()
+        self.y = tk.StringVar()
+        self.r1 = tk.StringVar()
+        self.r2 = tk.StringVar()
+        self.angle = tk.StringVar()
+        
+        self.x.set(x)
+        self.y.set(y)
+        self.r1.set(r1)
+        self.r2.set(r2)
+        self.angle.set(0)
+        
+        fields = [self.x, self.y, self.r1, self.r2, self.angle]
+        labels = ['x0', 'y0', 'r1', 'r2', 'angle']
+        update_fns = [self.update_center_x, self.update_center_y, 
+                      self.update_radius1_pt, self.update_radius2_pt,
+                      self.update_angle]
+        
+        # make result lines
+        for i in range(len(labels)):
+            
+            # make fields
+            lab = ttk.Label(self.result_frame, text=f'{labels[i]} = ')
+            entry = ttk.Entry(self.result_frame, 
+                            textvariable=fields[i], 
+                            width=10, 
+                            justify='right')
+            
+            entry.bind('<KeyRelease>', update_fns[i])
+                            
+            # grid
+            lab.grid(column=0, row=i, padx=5, pady=5, sticky='e')
+            entry.grid(column=1, row=i, padx=5, pady=5)
         
         # place circle at the center of the window
         self.patches = []
@@ -497,7 +710,6 @@ class Ellipse(Target):
                             setx=True, sety=True, color=self.color, marker='o')
         
         self.points = [self.pt_center, self.pt_radius1, self.pt_radius2]
-        self.update_popup_label()
         
     # ======================================================================= #
     def draw(self, ax):
@@ -505,65 +717,78 @@ class Ellipse(Target):
         
         super().draw(ax)
         
+        x = float(self.x.get())
+        y = float(self.y.get())
+        r1 = float(self.r1.get())
+        r2 = float(self.r2.get())
+        angle = float(self.angle.get())/180*np.pi
+        
         # draw things
-        self.patches.append(patches.Ellipse((self.x, self.y), 
-                                     width=self.r1*2, 
-                                     height=self.r2*2, 
-                                     angle=self.angle*180/np.pi, 
+        self.patches.append(patches.Ellipse((x, y), 
+                                     width=r1*2, 
+                                     height=r2*2, 
+                                     angle=angle*180/np.pi, 
                                      fill=False, 
                                      facecolor='none', 
                                      lw=1, 
                                      ls='-', 
                                      edgecolor=self.color))
         ax.add_patch(self.patches[-1])
-        self.pt_center.add_ax(ax, self.x, self.y)
-        self.pt_radius1.add_ax(ax,  self.x+self.r1*np.cos(self.angle), 
-                                    self.y+self.r1*np.sin(self.angle))
-        self.pt_radius2.add_ax(ax,  self.x+self.r2*np.cos(self.angle+np.pi/2), 
-                                    self.y+self.r2*np.sin(self.angle+np.pi/2))
+        self.pt_center.add_ax(ax, x, y)
+        self.pt_radius1.add_ax(ax,  x+r1*np.cos(angle), 
+                                    y+r1*np.sin(angle))
+        self.pt_radius2.add_ax(ax,  x+r2*np.sin(angle), 
+                                    y+r2*np.cos(angle))
 
     # ======================================================================= #
-    def update_popup_label(self):
-        """Update popup window label with info on target"""
-        
-        self.label.config(text='x0 = %.3f\ny0 = %.3f\nr1 = %.3f\nr2 = %.3f\nangle = %.3f [rad]' % \
-                        (self.x, self.y, self.r1, self.r2, self.angle))
-        
-    # ======================================================================= #
-    def update_center(self, x, y):
+    def update_center(self, x, y, do_set=True):
         """
             Update circle position based on DraggablePoint
         """
-        self.pt_radius1.set_xdata(x+self.r1*np.cos(self.angle))
-        self.pt_radius1.set_ydata(y+self.r1*np.sin(self.angle))
-        self.pt_radius2.set_xdata(x+self.r2*np.cos(self.angle+np.pi/2))
-        self.pt_radius2.set_ydata(y+self.r2*np.sin(self.angle+np.pi/2))
+        
+        try:
+            r1 = float(self.r1.get())
+            r2 = float(self.r2.get())
+            angle = float(self.angle.get())/180*np.pi
+        except ValueError:
+            return
+        
+        self.pt_radius1.set_xdata(x+r1*np.cos(angle))
+        self.pt_radius1.set_ydata(y+r1*np.sin(angle))
+        self.pt_radius2.set_xdata(x+r2*np.sin(angle))
+        self.pt_radius2.set_ydata(y+r2*np.cos(angle))
         
         for c in self.patches:
             c.set_center((x, y))
         
-        self.x = x
-        self.y = y
-        self.update_popup_label()
+        if do_set:
+            self.x.set(f'{x:.2f}')
+            self.y.set(f'{y:.2f}')
     
     # ======================================================================= #
-    def update_radius1(self, x, y):
+    def update_radius1(self, x, y, do_set=True):
         """
             Update circle radius based on DraggablePoint
         """
         
+        x0 = float(self.x.get())
+        y0 = float(self.y.get())
+        r1 = float(self.r1.get())
+        r2 = float(self.r2.get())
+        angle = float(self.angle.get())/180*np.pi
+        
         # calculate the xy distance
-        dx = x-self.x
-        dy = y-self.y
+        dx = x-x0
+        dy = y-y0
 
         # get the radius 
-        self.r1 = np.sqrt(dx**2+dy**2)
+        r1 = np.sqrt(dx**2+dy**2)
         
         # prevent too small of a radius
-        if self.r1 < self.rmin:
-            self.r1 = self.rmin
-            self.pt_radius1.set_xdata(self.x+self.r1*np.cos(self.angle))
-            self.pt_radius1.set_ydata(self.y+self.r1*np.sin(self.angle))
+        if r1 < self.rmin and do_set:
+            r1 = self.rmin
+            self.pt_radius1.set_xdata(x0+r1*np.cos(angle))
+            self.pt_radius1.set_ydata(y0+r1*np.sin(angle))
         
         # get the angle 
         try:
@@ -571,41 +796,49 @@ class Ellipse(Target):
         except RuntimeWarning:
             pass
         else:
-            self.angle = a
+            angle = a
             
         # big angles
         if dx < 0:
-            self.angle += np.pi
+            angle += np.pi
         
         # set patch
         for c in self.patches:
-            c.set_width(self.r1*2)
-            c.set_angle(self.angle*180/np.pi)
+            c.set_width(r1*2)
+            c.set_angle(angle*180/np.pi)
             
         # set r2
-        self.pt_radius2.set_xdata(self.x+self.r2*np.cos(self.angle+np.pi/2))
-        self.pt_radius2.set_ydata(self.y+self.r2*np.sin(self.angle+np.pi/2))
+        self.pt_radius2.set_xdata(x0+r2*np.cos(angle+np.pi/2))
+        self.pt_radius2.set_ydata(y0+r2*np.sin(angle+np.pi/2))
             
-        self.update_popup_label()
+        if do_set:
+            self.r1.set(f'{r1:.2f}')
+            self.angle.set(f'{angle*180/np.pi:.2f}')
     
     # ======================================================================= #
-    def update_radius2(self, x, y):
+    def update_radius2(self, x, y, do_set=True):
         """
             Update circle radius based on DraggablePoint
         """
 
+        x0 = float(self.x.get())
+        y0 = float(self.y.get())
+        r1 = float(self.r1.get())
+        r2 = float(self.r2.get())
+        angle = float(self.angle.get())/180*np.pi
+        
         # calculate the xy distance
-        dx = x-self.x
-        dy = y-self.y
+        dx = x-x0
+        dy = y-y0
 
         # get the radius 
-        self.r2 = np.sqrt(dx**2+dy**2)
+        r2 = np.sqrt(dx**2+dy**2)
         
         # prevent too small of a radius
-        if self.r2 < self.rmin:
-            self.r2 = self.rmin
-            self.pt_radius2.set_xdata(self.x+self.r2*np.cos(self.angle+np.pi/2))
-            self.pt_radius2.set_ydata(self.y+self.r2*np.sin(self.angle+np.pi/2))
+        if r2 < self.rmin and do_set:
+            r2 = self.rmin
+            self.pt_radius2.set_xdata(x0+r2*np.cos(angle+np.pi/2))
+            self.pt_radius2.set_ydata(y0+r2*np.sin(angle+np.pi/2))
         
         # get the angle 
         try:
@@ -613,22 +846,95 @@ class Ellipse(Target):
         except RuntimeWarning:
             pass
         else:
-            self.angle = a
+            angle = a
         
          # big angles
         if dx > 0:
-            self.angle -= np.pi
+            angle -= np.pi
             
         # set patch
         for c in self.patches:
-            c.set_height(self.r2*2)
-            c.set_angle(self.angle*180/np.pi)
+            c.set_height(r2*2)
+            c.set_angle(angle*180/np.pi)
             
         # set r1
-        self.pt_radius1.set_xdata(self.x+self.r1*np.cos(self.angle))
-        self.pt_radius1.set_ydata(self.y+self.r1*np.sin(self.angle))            
-        self.update_popup_label()
+        self.pt_radius1.set_xdata(x0+r1*np.cos(angle))
+        self.pt_radius1.set_ydata(y0+r1*np.sin(angle))       
         
+        if do_set:
+            self.r2.set(f'{r2:.2f}')
+            self.angle.set(f'{angle*180/np.pi:.2f}')
+
+    # ======================================================================= #
+    def update_radius1_pt(self, _): 
+        """
+            Update circle and draggable point based on typed input
+        """
+        try:
+            r1 = float(self.r1.get())
+            x = float(self.x.get())
+            y = float(self.y.get())
+            angle = float(self.angle.get())*np.pi/180
+        except ValueError:
+            return
+            
+        # get new positions
+        r1_x = abs(x+r1*np.cos(angle))
+        r1_y = abs(y+r1*np.sin(angle))
+        
+        # update position
+        self.pt_radius1.set_xdata(r1_x)
+        self.pt_radius1.set_ydata(r1_y)
+        self.update_radius1(r1_x, r1_y, False)
+        
+    def update_radius2_pt(self, _):
+        """
+            Update circle and draggable point based on typed input
+        """
+        try:
+            r2 = float(self.r2.get())
+            x = float(self.x.get())
+            y = float(self.y.get())
+            angle = float(self.angle.get())*np.pi/180
+        except ValueError:
+            return
+            
+        # get new positions
+        r2_x = abs(x+r2*np.cos(angle+np.pi/2))
+        r2_y = abs(y+r2*np.sin(angle+np.pi/2))
+        
+        # update position
+        self.pt_radius2.set_xdata(r2_x)
+        self.pt_radius2.set_ydata(r2_y)
+        self.update_radius2(r2_x, r2_y, False)
+        
+    def update_angle(self, _):
+        """
+            Update circle and draggable point based on typed input
+        """
+        try:
+            r1 = float(self.r1.get())
+            r2 = float(self.r2.get())
+            x = float(self.x.get())
+            y = float(self.y.get())
+            angle = float(self.angle.get())*np.pi/180
+        except ValueError:
+            return
+            
+        # get new positions
+        r1_x = abs(x+r1*np.cos(angle))
+        r1_y = abs(y+r1*np.sin(angle))
+        r2_x = abs(x+r2*np.cos(angle+np.pi/2))
+        r2_y = abs(y+r2*np.sin(angle+np.pi/2))
+        
+        # update position
+        self.pt_radius1.set_xdata(r1_x)
+        self.pt_radius1.set_ydata(r1_y)
+        self.pt_radius2.set_xdata(r2_x)
+        self.pt_radius2.set_ydata(r2_y)
+        self.update_radius1(r1_x, r1_y, False)
+        self.update_radius2(r2_x, r2_y, False)
+    
 class DraggablePoint:
 
     # http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively

@@ -22,7 +22,7 @@ class popup_target(object):
             interactive: BooleanVar, if true, target can be interacted with, 
                          using draggablepoints
             radios: list of radio buttons
-            result_label: ttk.label object for showing target info
+            result_frame: ttk.Frame object for showing target info
             shape: StringVar, stores shape to draw
             target: Target object
             win: toplevel window
@@ -93,9 +93,9 @@ class popup_target(object):
         ttk.Label(frame_col0, text=self.description).grid(column=0, row=1, 
                   sticky=(N, W), padx=10, pady=10)
         
-        # target info label
-        self.result_label = ttk.Label(frame_col0, text='')
-        self.result_label.grid(column=0, row=2, sticky=(N, W), padx=10, pady=10)
+        # target info frame
+        self.result_frame = ttk.Frame(frame_col0)
+        self.result_frame.grid(column=0, row=2, sticky=(N, W), padx=10, pady=10)
         
         # Column1 ----------------------------------------------------------
         frame_col1 = ttk.Frame(win, relief='sunken', pad=5)
@@ -144,13 +144,13 @@ class popup_target(object):
         
         if self.target is None:
             if self.shape.get() == 'circle':
-                self.target = Circle(self, self.color, self.result_label, 250, 185, 50)  
+                self.target = Circle(self, self.color, self.result_frame, 250, 185, 50)  
             elif self.shape.get() == 'square':
-                self.target = Square(self, self.color, self.result_label, 250, 185, 50)  
+                self.target = Square(self, self.color, self.result_frame, 250, 185, 50)  
             elif self.shape.get() == 'rectangle':
-                self.target = Rectangle(self, self.color, self.result_label, 250, 185, 50) 
+                self.target = Rectangle(self, self.color, self.result_frame, 250, 185, 50) 
             elif self.shape.get() == 'ellipse':
-                self.target = Ellipse(self, self.color, self.result_label, 250, 185, 50, 50) 
+                self.target = Ellipse(self, self.color, self.result_frame, 250, 185, 50, 50) 
             else: 
                 raise RuntimeError("Undefined shape")
         

@@ -1093,10 +1093,10 @@ class DraggablePoint:
     def set_xdata(self, x):
         """Set x coordinate"""
         for pt in self.points:
-            pt.set_xdata(x)    
+            pt.set_xdata([x])    
             
     # ======================================================================= #
     def set_ydata(self, y):
         """Set y coordinate"""
         for pt in self.points:
-            pt.set_ydata(y)
+            pt.set_ydata([y])
